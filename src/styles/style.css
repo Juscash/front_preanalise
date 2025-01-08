@@ -1,0 +1,82 @@
+body {
+    margin: 0;
+    padding: 0;
+}
+
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: url(../assets/img/fundo.jpg) no-repeat center center fixed;
+    background-size: cover;
+}
+
+.login-card {
+    background-color: #072854;
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+    border: none;
+
+}
+
+.logo-login {
+    width: 200px;
+    margin-bottom: 30px;
+
+}
+
+.login-title {
+    color: white;
+}
+
+.login-button {
+    width: 200px;
+}
+
+.login-content {
+    display: flex;
+    flex-direction: column;
+}
+
+
+/* sidebar.css */
+.ant-menu-item-selected {
+    background-color: #0a3672 !important;
+}
+
+.ant-menu-item-selected a,
+.ant-menu-item-selected span {
+    color: white !important;
+}
+
+.ant-menu-item:hover {
+    color: white !important;
+}
+
+.ant-menu-item-active {
+    background-color: #0a3672 !important;
+}
+
+.ant-menu-item .anticon {
+    color: white !important;
+}
+
+.ant-select-selector {
+    background-color: #D9D9D9 !important;
+    color: white !important;
+}
+
+.ant-select-selection-placeholder,
+.ant-select-selection-item {
+    color: #0a3672 !important;
+}
+
+input::placeholder {
+    color: #0a3672 !important;
+}
+
+textarea::placeholder {
+    color: #0a3672 !important;
+}
