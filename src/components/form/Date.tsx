@@ -1,53 +1,51 @@
 import React from "react";
-import { Input, Form } from "antd";
-import { InputProps } from "antd/es/input";
+import { DatePicker, Form } from "antd";
+import { RangePickerProps } from "antd/es/date-picker";
 
+const { RangePicker } = DatePicker;
 const { Item } = Form;
-interface CustomInputProps extends InputProps {
+
+interface CustomDateRangeProps extends RangePickerProps {
   label: string;
   name: string;
   required?: boolean;
   classLabel?: string;
   disabled?: boolean;
-  value?: string;
 }
 
-const CustomInput: React.FC<CustomInputProps> = ({
+const CustomDateRange: React.FC<CustomDateRangeProps> = ({
   label,
   required = false,
   name,
   classLabel = "form-label-default",
   disabled = false,
-  value,
   ...rest
 }) => {
   return (
     <Item
       label={label}
-      getValueProps={(val) => ({ value: value ?? val })}
       name={name}
       rules={[
         {
           required,
-          message: `Por favor digite ${label.toLowerCase()}`,
+          message: `Por favor selecione ${label.toLowerCase()}`,
         },
       ]}
       layout="vertical"
       labelCol={{ className: classLabel }}
     >
-      <Input
+      <RangePicker
         style={{
           width: "100%",
           backgroundColor: "#D9D9D9",
         }}
         disabled={disabled}
-        name={name}
-        placeholder={`Digite ${label.toLowerCase()}`}
-        value={value}
+        format="DD/MM/YYYY"
+        placeholder={["Data inicial", "Data final"]}
         {...rest}
       />
     </Item>
   );
 };
 
-export default CustomInput;
+export default CustomDateRange;

@@ -16,7 +16,6 @@ const Login: React.FC = () => {
   const { login } = useAuth();
 
   const handleGoogleSuccess = async (credentialResponse: any) => {
-    console.log("credentialResponse", credentialResponse);
     try {
       await login(credentialResponse.credential);
       navigate("/teste-prompt");
@@ -34,7 +33,7 @@ const Login: React.FC = () => {
 
           <GoogleLogin
             onSuccess={handleGoogleSuccess}
-            onError={() => console.log("Login Failed")}
+            onError={() => message.error("Erro ao fazer login com Google")}
           />
         </div>
       </Card>

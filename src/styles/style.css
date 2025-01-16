@@ -80,3 +80,11 @@ input::placeholder {
 textarea::placeholder {
     color: #0a3672 !important;
 }
+
+.form-label-default>label {
+    font-size: 16px !important;
+    color: #072854 !important;
+    font-weight: 700;
+
+}
+

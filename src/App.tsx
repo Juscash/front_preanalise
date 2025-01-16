@@ -7,51 +7,63 @@ import {
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import PrivateRoute from "./components/PrivateRoute";
 import { AuthProvider } from "./contexts/AuthContext";
+import ConfigProvider from "./contexts/AntdContext";
 
 import Login from "./pages/login";
 import TestePrompt from "./pages/teste_prompt";
 import HistoricoTeste from "./pages/historico_teste";
-import SidebarLayout from "./components/SidebarLayout";
+import SidebarLayout from "./components/sidebar/SidebarLayout";
 import NovaReanalise from "./pages/nova_reanalise";
+import GerenciadorPrompt from "./pages/gerenciador_prompt";
 
 function App() {
   return (
-    <GoogleOAuthProvider clientId="733436954468-ps2a91fg2l8j7o5nan7kgs1oej0vm9g8.apps.googleusercontent.com">
-      <AuthProvider>
-        <Router>
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route element={<PrivateRoute />}>
-              <Route
-                path="/teste-prompt"
-                element={
-                  <SidebarLayout>
-                    <TestePrompt />
-                  </SidebarLayout>
-                }
-              />
-              <Route
-                path="/historico-teste"
-                element={
-                  <SidebarLayout>
-                    <HistoricoTeste />
-                  </SidebarLayout>
-                }
-              />
-              <Route
-                path="/nova-reanalise"
-                element={
-                  <SidebarLayout>
-                    <NovaReanalise />
-                  </SidebarLayout>
-                }
-              />
-            </Route>
-            <Route path="*" element={<Navigate to="/login" replace />} />
-          </Routes>
-        </Router>
-      </AuthProvider>
-    </GoogleOAuthProvider>
+    <ConfigProvider>
+      <GoogleOAuthProvider clientId="733436954468-ps2a91fg2l8j7o5nan7kgs1oej0vm9g8.apps.googleusercontent.com">
+        <AuthProvider>
+          <Router>
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route element={<PrivateRoute />}>
+                <Route
+                  path="/teste-prompt"
+                  element={
+                    <SidebarLayout>
+                      <TestePrompt />
+                    </SidebarLayout>
+                  }
+                />
+                <Route
+                  path="/gerenciador-prompt"
+                  element={
+                    <SidebarLayout>
+                      <GerenciadorPrompt />
+                    </SidebarLayout>
+                  }
+                />
+                <Route
+                  path="/historico-teste"
+                  element={
+                    <SidebarLayout>
+                      <HistoricoTeste />
+                    </SidebarLayout>
+                  }
+                />
+                <Route
+                  path="/nova-reanalise"
+                  element={
+                    <SidebarLayout>
+                      <NovaReanalise />
+                    </SidebarLayout>
+                  }
+                />
+              </Route>
+              <Route path="*" element={<Navigate to="/login" replace />} />
+            </Routes>
+          </Router>
+        </AuthProvider>
+      </GoogleOAuthProvider>
+    </ConfigProvider>
   );
 }
 

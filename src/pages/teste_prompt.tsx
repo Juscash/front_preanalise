@@ -1,326 +1,329 @@
-import React, { useState, useEffect } from "react";
-import { Typography, Row, Col, Button, message, Table } from "antd";
-import { Select, Input, TextArea } from "../components/form";
+import { Title } from "../components/typograph";
+import { useState, useEffect } from "react";
+import { Row, Col, Button, message } from "antd";
+import { Select, CustomDateRange, TextArea } from "../components/form";
+import { SearchOutlined } from "@ant-design/icons";
+import TestPrompt from "../components/results/test_prompt";
+import dayjs from "dayjs";
+import customParseFormat from "dayjs/plugin/customParseFormat";
+
+dayjs.extend(customParseFormat);
+
+const dateFormat = "DD/MM/YYYY";
+
 import {
   getPrompts,
-  Prompt,
-  createPrompt,
   getSaidasProcessos,
   getProcessosMotivo,
-  testPrompt,
 } from "../services/api";
-import { Pie, Gauge } from "@ant-design/plots";
-import * as XLSX from "xlsx";
-import GaugeChart from "../components/grafico";
-const { Title } = Typography;
+import { Prompt } from "../models";
 
+type FilterProcess = {
+  motivo: string;
+  data: string;
+};
 const TestePrompt = () => {
+  const [loading, setLoading] = useState(false);
   const [prompts, setPrompts] = useState<Prompt[]>([]);
-
-  const [showResult, setShowResult] = useState(false);
+  const [promptSelected, setPromptSelected] = useState<Prompt | null>(null);
+  const [saidasProcessos, setSaidasProcessos] = useState<any[]>([]);
+  const [filterProcess, setFilterProcess] = useState<FilterProcess>({
+    motivo: "",
+    data: "",
+  });
+  const [viewResult, setViewResult] = useState(false);
+  const [processos, setProcessos] = useState<string>("");
   const [resultData, setResultData] = useState<{
-    tableData: any[];
     acuracia?: number;
     precisao?: number;
     nbe?: number;
     cobertura?: number;
-  } | null>(null);
-
-  const [processos, setProcessos] = useState<string>("");
-  const [saidasProcessos, setSaidasProcessos] = useState<any[]>([]);
-  const [newPrompt, setNewPrompt] = useState({
-    nome: "",
-    descricao: "",
-    prompt: "",
+    data: any[];
+  }>({
+    acuracia: 60,
+    precisao: 50,
+    nbe: 15,
+    cobertura: 40,
+    data: [
+      {
+        key: "1",
+        processo: "10238293520241010041",
+        tribunal: "TJSP",
+        analiseHumana: "Aprovado",
+        dataAH: "20/03/24",
+        justificativaAH: "",
+        analiseAutomacao: "Aprovado",
+        justificativaAutomacao: "",
+      },
+      {
+        key: "2",
+        processo: "10238293520241010041",
+        tribunal: "TJSP",
+        analiseHumana: "Negado",
+        dataAH: "22/03/24",
+        justificativaAH: "Sem sentença",
+        analiseAutomacao: "Negado",
+        justificativaAutomacao: "",
+      },
+      {
+        key: "3",
+        processo: "10238293520241010041",
+        tribunal: "TJSP",
+        analiseHumana: "Negado",
+        dataAH: "22/03/24",
+        justificativaAH: "RPV em iminência de pagamento",
+        analiseAutomacao: "Aprovado",
+        justificativaAutomacao: "",
+      },
+      {
+        key: "4",
+        processo: "10238293520241010041",
+        tribunal: "TJSP",
+        analiseHumana: "Negado",
+        dataAH: "22/03/24",
+        justificativaAH: "RPV em iminência de pagamento",
+        analiseAutomacao: "Aprovado",
+        justificativaAutomacao: "",
+      },
+      {
+        key: "5",
+        processo: "10238293520241010041",
+        tribunal: "TJSP",
+        analiseHumana: "Negado",
+        dataAH: "22/03/24",
+        justificativaAH: "RPV em iminência de pagamento",
+        analiseAutomacao: "Aprovado",
+        justificativaAutomacao: "",
+      },
+      {
+        key: "6",
+        processo: "10238293520241010041",
+        tribunal: "TJSP",
+        analiseHumana: "Negado",
+        dataAH: "22/03/24",
+        justificativaAH: "RPV em iminência de pagamento",
+        analiseAutomacao: "Aprovado",
+        justificativaAutomacao: "",
+      },
+      {
+        key: "7",
+        processo: "10238293520241010041",
+        tribunal: "TJSP",
+        analiseHumana: "Negado",
+        dataAH: "22/03/24",
+        justificativaAH: "RPV em iminência de pagamento",
+        analiseAutomacao: "Aprovado",
+        justificativaAutomacao: "",
+      },
+      {
+        key: "8",
+        processo: "10238293520241010041",
+        tribunal: "TJSP",
+        analiseHumana: "Negado",
+        dataAH: "22/03/24",
+        justificativaAH: "RPV em iminência de pagamento",
+        analiseAutomacao: "Aprovado",
+        justificativaAutomacao: "",
+      },
+      {
+        key: "9",
+        processo: "10238293520241010041",
+        tribunal: "TJSP",
+        analiseHumana: "Negado",
+        dataAH: "22/03/24",
+        justificativaAH: "RPV em iminência de pagamento",
+        analiseAutomacao: "Aprovado",
+        justificativaAutomacao: "",
+      },
+      {
+        key: "10",
+        processo: "10238293520241010041",
+        tribunal: "TJSP",
+        analiseHumana: "Negado",
+        dataAH: "22/03/24",
+        justificativaAH: "RPV em iminência de pagamento",
+        analiseAutomacao: "Aprovado",
+        justificativaAutomacao: "",
+      },
+      {
+        key: "11",
+        processo: "10238293520241010041",
+        tribunal: "TJSP",
+        analiseHumana: "Negado",
+        dataAH: "22/03/24",
+        justificativaAH: "RPV em iminência de pagamento",
+        analiseAutomacao: "Aprovado",
+        justificativaAutomacao: "",
+      },
+    ],
   });
 
-  const handleNovoTeste = async () => {
+  const fetchPrompts = async () => {
     try {
-      const result = await testPrompt(newPrompt.prompt, processos);
-      setResultData(result);
-      setShowResult(true);
+      const prompts = await getPrompts();
+      setPrompts(prompts);
     } catch (error) {
-      console.error("Erro ao realizar o teste:", error);
-      message.error("Erro ao realizar o teste");
+      console.error("Erro ao buscar prompts:", error);
+      message.error("Erro ao buscar prompts");
     }
   };
 
-  const exportToExcel = () => {
-    if (!resultData) {
-      return message.error("Nenhum resultado para exportar");
+  const fetchSaidasProcessos = async () => {
+    try {
+      const saidas = await getSaidasProcessos();
+      setSaidasProcessos(saidas);
+    } catch (error) {
+      console.error("Erro ao buscar saídas de processos:", error);
+      message.error("Erro ao buscar saídas de processos");
     }
-    const ws = XLSX.utils.json_to_sheet(resultData.tableData);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Resultados");
-    XLSX.writeFile(wb, "resultados_teste_prompt.xlsx");
   };
-
-  const columns = [
-    { title: "Processo", dataIndex: "processo", key: "processo" },
-    { title: "Tribunal", dataIndex: "tribunal", key: "tribunal" },
-    {
-      title: "Análise humana",
-      dataIndex: "analiseHumana",
-      key: "analiseHumana",
-    },
-    { title: "Data AH", dataIndex: "dataAH", key: "dataAH" },
-    {
-      title: "Justificativa AH",
-      dataIndex: "justificativaAH",
-      key: "justificativaAH",
-    },
-    {
-      title: "Análise automação",
-      dataIndex: "analiseAutomacao",
-      key: "analiseAutomacao",
-    },
-    {
-      title: "Justificativa automação",
-      dataIndex: "justificativaAutomacao",
-      key: "justificativaAutomacao",
-    },
-  ];
 
   useEffect(() => {
-    fetchData();
+    fetchPrompts();
+    fetchSaidasProcessos();
   }, []);
 
-  const fetchData = async () => {
-    try {
-      const [promptsData, saidasData] = await Promise.all([
-        getPrompts(),
-        getSaidasProcessos(),
-      ]);
-      setPrompts(promptsData.map((p, index) => ({ id: index, ...p })));
-      setSaidasProcessos(saidasData);
-    } catch (error) {
-      console.error("Erro ao buscar dados:", error);
-      message.error("Erro ao carregar dados");
-    }
+  const changeFilterProcess = (motivo: string) => {
+    setFilterProcess({ ...filterProcess, motivo });
   };
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    setNewPrompt({ ...newPrompt, [e.target.name]: e.target.value });
-  };
-
-  const handleSavePrompt = async () => {
-    const { nome, descricao, prompt } = newPrompt;
-    if (!nome || !descricao || !prompt) {
-      return message.error("Por favor, preencha todos os campos obrigatórios");
-    }
-
+  const fetchProcessosMotivo = async () => {
+    setLoading(true);
     try {
-      await createPrompt({ grupo: nome, descricao, prompt });
-      message.success("Prompt gravado com sucesso");
-      setNewPrompt({ nome: "", descricao: "", prompt: "" });
-      fetchData();
-    } catch (error) {
-      console.error("Erro ao gravar prompt:", error);
-      message.error("Erro ao gravar prompt");
-    }
-  };
-
-  const fetchProcessosMotivo = async (motivo: string) => {
-    try {
-      const data = await getProcessosMotivo(motivo);
+      const data = await getProcessosMotivo(filterProcess.motivo);
+      console.log("aq");
       setProcessos(data.map((item) => item.numero_processo).join(","));
+      console.log(data);
     } catch (error) {
       console.error("Erro ao buscar processos por motivo:", error);
       message.error("Erro ao buscar processos por motivo");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const startTest = async () => {
+    setLoading(true);
+    try {
+      // const data = await startTestPrompt();
+      setViewResult(true);
+    } catch (error) {
+      console.error("Erro ao iniciar teste:", error);
+      message.error("Erro ao iniciar teste");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div>
-      <Title
-        level={1}
-        style={{
-          color: "#0a3672",
-          marginTop: "0px",
-          marginBottom: "24px",
-          borderBottom: "1px solid #0a3672",
-          paddingBottom: "12px",
-        }}
-      >
-        Teste de prompt
-      </Title>
-
-      <Row gutter={16}>
-        <Col span={24}>
-          <Select
-            label="Prompts gravados"
-            options={prompts.map((p) => ({
-              value: `${p.id}`,
-              label: `${p.grupo} - ${p.descricao} - ${p.datahora}`,
-            }))}
-            onChange={(value) =>
-              setNewPrompt({
-                ...newPrompt,
-                prompt: prompts.find((p) => `${p.id}` === value)?.prompt || "",
-              })
-            }
-          />
-        </Col>
-      </Row>
-
-      <Row gutter={16}>
-        <Col span={12}>
-          <Input
-            label="Nome do prompt"
-            name="nome"
-            onChange={handleInputChange}
-            value={newPrompt.nome}
-            required
-          />
-        </Col>
-        <Col span={12}>
-          <Input
-            label="Descrição do prompt"
-            name="descricao"
-            onChange={handleInputChange}
-            value={newPrompt.descricao}
-            required
-          />
-        </Col>
-      </Row>
-
-      <Row style={{ marginTop: "16px" }}>
-        <Col span={24}>
-          <TextArea
-            name="prompt"
-            label="Texto do prompt"
-            value={newPrompt.prompt}
-            onChange={handleInputChange}
-            required
-          />
-        </Col>
-      </Row>
-      <Row style={{ marginTop: "16px" }}>
-        <Col span={24} style={{ display: "flex", justifyContent: "flex-end" }}>
-          <Button
-            type="primary"
-            onClick={handleSavePrompt}
-            style={{ backgroundColor: "#0a3672", borderColor: "#0a3672" }}
-          >
-            Gravar Prompt
-          </Button>
-        </Col>
-      </Row>
-
-      <Title
-        level={2}
-        style={{
-          color: "#0a3672",
-          marginTop: "20px",
-          marginBottom: "24px",
-          paddingBottom: "12px",
-        }}
-      >
-        Testar prompt
-      </Title>
-
-      <Row gutter={16}>
-        <Col span={24}>
-          <Select
-            label="Selecionar saída do processo"
-            options={saidasProcessos.map((p) => ({
-              value: `${p.motivo_perda}`,
-              label: `${p.motivo_perda}`,
-            }))}
-            onChange={fetchProcessosMotivo}
-          />
-        </Col>
-      </Row>
-
-      <Row style={{ marginTop: "16px" }}>
-        <Col span={24}>
-          <TextArea
-            name="processos"
-            label={`Processos (${
-              processos.split(",").filter((p) => p.trim() !== "").length
-            })`}
-            value={processos}
-            onChange={(e) => setProcessos(e.target.value)}
-          />
-        </Col>
-      </Row>
-      <Row style={{ marginTop: "16px" }}>
-        <Col span={24} style={{ display: "flex", justifyContent: "flex-end" }}>
-          <Button
-            type="primary"
-            style={{ backgroundColor: "#0a3672", borderColor: "#0a3672" }}
-            onClick={handleNovoTeste}
-          >
-            Novo teste
-          </Button>
-        </Col>
-      </Row>
-
-      {showResult && (
-        <>
-          <Title
-            level={2}
+    <>
+      <Title level={1}>Teste de prompt</Title>
+      <div style={{ padding: "0px 20px" }}>
+        <Row gutter={16}>
+          <Col span={16}>
+            <Select
+              label="Selecione um prompt"
+              name="prompts"
+              selects={prompts.map((p) => ({
+                value: `${p.id}`,
+                name: `${p.grupo} - ${p.descricao} - ${p.datahora}`,
+              }))}
+              onChange={(value) => {
+                let select = prompts.find((p) => `${p.id}` == value);
+                setPromptSelected(select || null);
+              }}
+            />
+          </Col>
+        </Row>
+        <Row gutter={16}>
+          <Col span={16}>
+            <TextArea
+              label="Prompt selecionado"
+              name="prompt_selected"
+              rows={6}
+              value={promptSelected?.prompt}
+            />
+          </Col>
+        </Row>
+        <Row gutter={16}>
+          <Col span={7}>
+            <Select
+              label="Selecionar saída de processo"
+              name="saida"
+              selects={saidasProcessos.map((p) => ({
+                value: `${p.motivo_perda}`,
+                name: `${p.motivo_perda}`,
+              }))}
+              onChange={changeFilterProcess}
+            />
+          </Col>
+          <Col span={6}>
+            <CustomDateRange
+              label="Selecionar a data o processo"
+              name="dataprocesso"
+              defaultValue={[
+                dayjs("01/09/2024", dateFormat),
+                dayjs("30/09/2024", dateFormat),
+              ]}
+            />
+          </Col>
+          <Col
+            span={3}
             style={{
-              color: "#0a3672",
-              marginTop: "20px",
-              marginBottom: "24px",
-              paddingBottom: "12px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "end",
             }}
           >
-            Resultado
-          </Title>
-
-          <Row gutter={[16, 16]} justify="space-around">
-            <Col>
-              <GaugeChart value={resultData?.acuracia} label="Acurácia" />
-            </Col>
-            <Col>
-              <GaugeChart
-                value={resultData?.precisao}
-                label="Precisão de negativas"
-              />
-            </Col>
-            <Col>
-              <GaugeChart value={resultData?.nbe} label="NBE" />
-            </Col>
-            <Col>
-              <GaugeChart value={resultData?.cobertura} label="Cobertura" />
-            </Col>
-          </Row>
-
-          <Row style={{ marginTop: "30px" }}>
-            <Col span={24}>
-              <Table
-                dataSource={resultData?.tableData}
-                columns={columns}
-                pagination={{ pageSize: 10 }}
-                style={{
-                  backgroundColor: "white",
-                  border: "1px solid #f0f0f0",
-                  borderRadius: "8px",
-                  boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
-                }}
-              />
-              <Row justify="end" style={{ marginTop: "16px" }}>
-                <Button
-                  type="primary"
-                  onClick={exportToExcel}
-                  style={{
-                    backgroundColor: "#0a3672",
-                    borderColor: "#0a3672",
-                    marginRight: "16px",
-                  }}
-                >
-                  Exportar para Excel
-                </Button>
-              </Row>
-            </Col>
-          </Row>
-        </>
+            <Button
+              type="primary"
+              icon={<SearchOutlined />}
+              iconPosition={"end"}
+              onClick={fetchProcessosMotivo}
+              loading={loading}
+            >
+              Buscar
+            </Button>
+          </Col>
+        </Row>
+        <Row gutter={16}>
+          <Col span={16}>
+            <TextArea
+              name="processos"
+              label={`Processos (${
+                processos.split(",").filter((p) => p.trim() !== "").length
+              })`}
+              value={processos}
+              onChange={(e) => setProcessos(e.target.value)}
+            />
+          </Col>
+        </Row>
+        <Row style={{ marginTop: "16px" }}>
+          <Col
+            span={16}
+            style={{ display: "flex", justifyContent: "flex-end" }}
+          >
+            <Button
+              type="primary"
+              onClick={startTest}
+              disabled={loading}
+              loading={loading}
+            >
+              Iniciar teste
+            </Button>
+          </Col>
+        </Row>
+      </div>
+      {viewResult && (
+        <TestPrompt
+          acuracia={resultData.acuracia || 0}
+          precisao={resultData.precisao || 0}
+          nbe={resultData.nbe || 0}
+          cobertura={resultData.cobertura || 0}
+          data={resultData.data}
+        />
       )}
-    </div>
+    </>
   );
 };
 

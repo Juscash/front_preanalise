@@ -1,12 +1,38 @@
-import React, { useState } from "react";
-import { Typography, Row, Col, Select, Input, Button, Card } from "antd";
-import { ReloadOutlined } from "@ant-design/icons";
+import React, { useState, useEffect } from "react";
+import { Row, Col, Button, message } from "antd";
+import { Select, CustomDateRange, TextArea, Input } from "../components/form";
+import { Prompt } from "../models";
+import dayjs from "dayjs";
+import customParseFormat from "dayjs/plugin/customParseFormat";
 
-const { Title } = Typography;
-const { Option } = Select;
-const { TextArea } = Input;
+dayjs.extend(customParseFormat);
+
+const dateFormat = "DD/MM/YYYY";
+import { Title } from "../components/typograph";
+import {
+  getPrompts,
+  getSaidasProcessos,
+  getProcessosMotivo,
+} from "../services/api";
 
 const NovaReanalise: React.FC = () => {
+  const [prompts, setPrompts] = useState<Prompt[]>([]);
+  const [promptSelected, setPromptSelected] = useState<Prompt | null>(null);
+
+  const fetchPrompts = async () => {
+    try {
+      const prompts = await getPrompts();
+      setPrompts(prompts);
+    } catch (error) {
+      console.error("Erro ao buscar prompts:", error);
+      message.error("Erro ao buscar prompts");
+    }
+  };
+
+  useEffect(() => {
+    fetchPrompts();
+  }, []);
+
   const [selectedPrompt, setSelectedPrompt] = useState<string | null>(null);
   const [selectedPeriod, setSelectedPeriod] = useState<string | null>(null);
   const [samplePercentage, setSamplePercentage] = useState<string>("");
@@ -28,22 +54,50 @@ const NovaReanalise: React.FC = () => {
   };
 
   return (
-    <div>
-      <Title
-        level={1}
-        style={{
-          color: "#0a3672",
-          marginTop: "0px",
-          marginBottom: "24px",
-          borderBottom: "1px solid #0a3672",
-          paddingBottom: "12px",
-        }}
-      >
-        Nova reanálise
-      </Title>
+    <>
+      <Title level={1}>Nova reanálise</Title>
       <Row gutter={24}>
-        <Col span={12}>
-          <Card>
+        <Col span={16}>
+          <Row gutter={16}>
+            <Col span={16}>
+              <Select
+                label="Selecione um prompt"
+                name="prompts"
+                selects={prompts.map((p) => ({
+                  value: `${p.id}`,
+                  name: `${p.grupo} - ${p.descricao} - ${p.datahora}`,
+                }))}
+                onChange={(value) => {
+                  let select = prompts.find((p) => `${p.id}` == value);
+                  setPromptSelected(select || null);
+                }}
+              />
+            </Col>
+          </Row>
+          <Row gutter={16}>
+            <Col span={9}>
+              <CustomDateRange
+                label="Selecione o periodo"
+                name="dataprocesso"
+                defaultValue={[
+                  dayjs("01/09/2024", dateFormat),
+                  dayjs("30/09/2024", dateFormat),
+                ]}
+              />
+            </Col>
+            <Col span={7}>
+              <Input label="Porcentagem da amostra" name="amostra" />
+            </Col>
+          </Row>
+          <Row style={{ marginTop: "16px" }}>
+            <Col
+              span={16}
+              style={{ display: "flex", justifyContent: "center" }}
+            >
+              <Button type="primary">Ver processos</Button>
+            </Col>
+          </Row>
+          {/*    <Card>
             <Select
               style={{ width: "100%", marginBottom: "16px" }}
               placeholder="Selecionar Prompt"
@@ -87,7 +141,7 @@ const NovaReanalise: React.FC = () => {
               bodyStyle={{ padding: "10px" }}
             >
               <div style={{ minHeight: "100px" }}>
-                {/* Aqui você pode adicionar a lista de processos se necessário */}
+                {/* Aqui você pode adicionar a lista de processos se necessário 
               </div>
             </Card>
             <div style={{ textAlign: "center", marginBottom: "16px" }}>
@@ -121,19 +175,19 @@ const NovaReanalise: React.FC = () => {
                 </Button>
               </Col>
             </Row>
-          </Card>
+          </Card> */}
         </Col>
-        <Col span={12}>
-          <Card title="Prévia do prompt" style={{ height: "100%" }}>
+        <Col span={8}>
+          {/*   <Card title="Prévia do prompt" style={{ height: "100%" }}>
             <TextArea
               value={selectedPrompt ? promptsData[selectedPrompt] : ""}
               style={{ height: "200px" }}
               readOnly
             />
-          </Card>
+          </Card> */}
         </Col>
       </Row>
-    </div>
+    </>
   );
 };
 

@@ -9,13 +9,37 @@ import {
   LogoutOutlined,
 } from "@ant-design/icons";
 import { CSSProperties } from "react";
-import { useAuth } from "../contexts/AuthContext";
-import Logo from "../assets/img/logo.svg";
-const { Sider, Content } = Layout;
+import { useAuth } from "../../contexts/AuthContext";
+import Logo from "../../assets/img/logo.svg";
+const { Sider, Content, Header } = Layout;
 
 interface SidebarLayoutProps {
   children: React.ReactNode;
 }
+
+const itensMenu = [
+  {
+    key: "/gerenciador-prompt",
+    icon: <FileTextOutlined />,
+    text: "Gerenciador Prompt",
+  },
+  {
+    key: "/teste-prompt",
+    icon: <FileTextOutlined />,
+    text: "Teste de Prompt",
+  },
+
+  {
+    key: "/historico-teste",
+    icon: <HistoryOutlined />,
+    text: "Histórico de Teste",
+  },
+  {
+    key: "/nova-reanalise",
+    icon: <HistoryOutlined />,
+    text: "Nova reanalise",
+  },
+];
 
 const SidebarLayout: React.FC<SidebarLayoutProps> = ({ children }) => {
   const { user, logout } = useAuth();
@@ -46,9 +70,6 @@ const SidebarLayout: React.FC<SidebarLayoutProps> = ({ children }) => {
       onOk() {
         logout();
       },
-      onCancel() {
-        // Ação ao cancelar se necessário
-      },
     });
   };
 
@@ -65,52 +86,30 @@ const SidebarLayout: React.FC<SidebarLayoutProps> = ({ children }) => {
         style={sidebarStyle}
         trigger={null}
       >
-        <div style={{ padding: "10px", textAlign: "center" }}>
-          <Button
-            type="text"
-            onClick={toggleCollapsed}
-            style={{ color: "white" }}
-            icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+        <div style={{ display: "flex", justifyContent: "center" }}>
+          <img
+            src={Logo}
+            alt="logo"
+            style={{
+              width: collapsed ? "70%" : "80%",
+              marginBottom: "30px",
+              marginTop: "30px",
+            }}
           />
         </div>
-        <img
-          src={Logo}
-          alt="logo"
-          style={{ width: "100%", padding: "10px", marginBottom: "30px" }}
-        />
 
         <Menu
           mode="inline"
           selectedKeys={[location.pathname]}
           style={menuStyle}
         >
-          <Menu.Item
-            key="/teste-prompt"
-            icon={<FileTextOutlined style={menuItemStyle} />}
-            style={menuItemStyle}
-          >
-            <Link to="/teste-prompt" style={menuItemStyle}>
-              Teste Prompt
-            </Link>
-          </Menu.Item>
-          <Menu.Item
-            key="/historico-teste"
-            icon={<HistoryOutlined style={menuItemStyle} />}
-            style={menuItemStyle}
-          >
-            <Link to="/historico-teste" style={menuItemStyle}>
-              Histórico de Teste
-            </Link>
-          </Menu.Item>
-          <Menu.Item
-            key="/nova-reanalise"
-            icon={<HistoryOutlined style={menuItemStyle} />}
-            style={menuItemStyle}
-          >
-            <Link to="/nova-reanalise" style={menuItemStyle}>
-              Nova reanalise
-            </Link>
-          </Menu.Item>
+          {itensMenu.map((item) => (
+            <Menu.Item key={item.key} icon={item.icon} style={menuItemStyle}>
+              <Link to={item.key} style={menuItemStyle}>
+                {item.text}
+              </Link>
+            </Menu.Item>
+          ))}
           <Menu.Item
             key="/sair"
             icon={<LogoutOutlined style={menuItemStyle} />}
@@ -125,26 +124,35 @@ const SidebarLayout: React.FC<SidebarLayoutProps> = ({ children }) => {
             </Button>
           </Menu.Item>
         </Menu>
-        {!collapsed && (
-          <div style={{ marginTop: "60px", width: "100%" }}>
-            <Divider style={{ background: "white" }} />
-            <div
+      </Sider>
+      <Layout>
+        <Header style={{ height: "40px", ...sidebarStyle }}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              height: "100%",
+            }}
+          >
+            <Button
+              type="text"
+              onClick={toggleCollapsed}
+              style={{ color: "white", marginLeft: "-50px" }}
+              icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+            />
+            <h1
               style={{
                 color: "white",
-                textAlign: "start",
-                marginLeft: "10px",
-                marginBottom: "10px",
+                fontSize: "18px",
               }}
             >
               Olá, {user?.name}!
-            </div>
+            </h1>
           </div>
-        )}
-      </Sider>
-      <Layout>
+        </Header>
         <Content
           style={{
-            margin: "24px 16px",
             padding: 24,
             background: "#fff",
             minHeight: 280,

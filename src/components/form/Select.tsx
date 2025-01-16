@@ -1,31 +1,46 @@
 import React from "react";
-import { Select } from "antd";
+import { Select, Form } from "antd";
 import { SelectProps } from "antd/es/select";
 
+const { Item } = Form;
 interface CustomSelectProps extends SelectProps {
   label: string;
-  options: { value: string; label: string }[];
+  name: string;
+  required?: boolean;
+  selects?: { value: string; name: string }[];
+  classLabel?: string;
 }
 
 const CustomSelect: React.FC<CustomSelectProps> = ({
   label,
   options,
+  required = false,
+  name,
+  selects = [],
+  classLabel = "form-label-default",
   ...rest
 }) => {
   return (
-    <div style={{ marginBottom: 16 }}>
-      <div style={{ marginBottom: 8, fontWeight: "bold", color: "#072854" }}>
-        {label}
-      </div>
-      <Select
-        style={{
-          width: "100%",
-        }}
-        placeholder={`Selecione ${label.toLowerCase()}`}
-        options={options}
-        {...rest}
-      />
-    </div>
+    <Item
+      label={label}
+      name={name}
+      rules={[
+        {
+          required,
+          message: `Por favor selecione ${label.toLowerCase()}`,
+        },
+      ]}
+      layout="vertical"
+      labelCol={{ className: classLabel }}
+    >
+      <Select placeholder={label} {...rest}>
+        {selects.map((s) => (
+          <Select.Option key={s.value} value={s.value}>
+            {s.name}
+          </Select.Option>
+        ))}
+      </Select>
+    </Item>
   );
 };
 

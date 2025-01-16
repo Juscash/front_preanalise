@@ -9,7 +9,7 @@ import api from "../services/api";
 
 interface AuthContextData {
   authenticated: boolean;
-  user: any;
+  user: { name: string; email: string } | null;
   login: (googleToken: string) => Promise<void>;
   logout: () => void;
   verifyToken: () => Promise<boolean>;
@@ -22,7 +22,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [authenticated, setAuthenticated] = useState(false);
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<{ name: string; email: string } | null>(
+    null
+  );
   const [loading, setLoading] = useState(true);
 
   const verifyToken = useCallback(async (): Promise<boolean> => {
@@ -34,10 +36,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       }
 
       api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-      const response = await api.get("/verify-token");
+      const response = await api.get("auth/verify_token");
       setUser(response.data);
       setAuthenticated(true);
       setLoading(false);
+
       return true;
     } catch (error) {
       console.error("Erro na verificação do token:", error);
@@ -52,7 +55,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const login = async (googleToken: string) => {
     try {
-      const response = await api.post("/auth/google", { token: googleToken });
+      const response = await api.post(
+        "auth/google",
+        { token: googleToken },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",
+          },
+        }
+      );
       const { token, user } = response.data;
       localStorage.setItem("token", token);
       api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
