@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Layout, Menu, Button, Divider, Modal } from "antd";
+import { Layout, Menu, Button, Avatar, Modal, Popover } from "antd";
 import { Link, useLocation } from "react-router-dom";
 import {
   FileTextOutlined,
@@ -7,39 +7,19 @@ import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
   LogoutOutlined,
+  ExperimentOutlined,
+  SyncOutlined,
+  UserOutlined,
 } from "@ant-design/icons";
 import { CSSProperties } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import Logo from "../../assets/img/logo.svg";
+
 const { Sider, Content, Header } = Layout;
 
 interface SidebarLayoutProps {
   children: React.ReactNode;
 }
-
-const itensMenu = [
-  {
-    key: "/gerenciador-prompt",
-    icon: <FileTextOutlined />,
-    text: "Gerenciador Prompt",
-  },
-  {
-    key: "/teste-prompt",
-    icon: <FileTextOutlined />,
-    text: "Teste de Prompt",
-  },
-
-  {
-    key: "/historico-teste",
-    icon: <HistoryOutlined />,
-    text: "Histórico de Teste",
-  },
-  {
-    key: "/nova-reanalise",
-    icon: <HistoryOutlined />,
-    text: "Nova reanalise",
-  },
-];
 
 const SidebarLayout: React.FC<SidebarLayoutProps> = ({ children }) => {
   const { user, logout } = useAuth();
@@ -55,12 +35,6 @@ const SidebarLayout: React.FC<SidebarLayoutProps> = ({ children }) => {
     color: "white",
   };
 
-  const menuItemStyle: any = {
-    color: "white",
-    "&:hover": {
-      color: "white",
-    },
-  };
   const confirmLogout = () => {
     Modal.confirm({
       title: "Confirmar Sair",
@@ -73,9 +47,67 @@ const SidebarLayout: React.FC<SidebarLayoutProps> = ({ children }) => {
     });
   };
 
+  const content = () => (
+    <Button type="primary" onClick={confirmLogout} icon={<LogoutOutlined />}>
+      Sair
+    </Button>
+  );
+
   const toggleCollapsed = () => {
     setCollapsed(!collapsed);
   };
+
+  const menuItems = [
+    {
+      key: "/gerenciador-prompt",
+      icon: <FileTextOutlined />,
+      label: (
+        <Link to="/gerenciador-prompt" style={menuStyle}>
+          Gerenciador Prompt
+        </Link>
+      ),
+    },
+    {
+      key: "/teste-prompt",
+      icon: <ExperimentOutlined />,
+      label: (
+        <Link to="/teste-prompt" style={menuStyle}>
+          Teste de Prompt
+        </Link>
+      ),
+    },
+    {
+      key: "/historico-teste",
+      icon: <HistoryOutlined />,
+      label: (
+        <Link to="/historico-teste" style={menuStyle}>
+          Histórico de Teste
+        </Link>
+      ),
+    },
+    {
+      key: "/nova-reanalise",
+      icon: <SyncOutlined />,
+      label: (
+        <Link to="/nova-reanalise" style={menuStyle}>
+          Nova reanalise
+        </Link>
+      ),
+    },
+    {
+      key: "/sair",
+      icon: <LogoutOutlined />,
+      label: (
+        <Button
+          type="text"
+          style={{ color: "white", textAlign: "start", display: "flex" }}
+          onClick={confirmLogout}
+        >
+          Sair
+        </Button>
+      ),
+    },
+  ];
 
   return (
     <Layout style={{ minHeight: "100vh" }}>
@@ -101,32 +133,12 @@ const SidebarLayout: React.FC<SidebarLayoutProps> = ({ children }) => {
         <Menu
           mode="inline"
           selectedKeys={[location.pathname]}
-          style={menuStyle}
-        >
-          {itensMenu.map((item) => (
-            <Menu.Item key={item.key} icon={item.icon} style={menuItemStyle}>
-              <Link to={item.key} style={menuItemStyle}>
-                {item.text}
-              </Link>
-            </Menu.Item>
-          ))}
-          <Menu.Item
-            key="/sair"
-            icon={<LogoutOutlined style={menuItemStyle} />}
-            style={menuItemStyle}
-          >
-            <Button
-              type="text"
-              style={{ color: "white", textAlign: "start", display: "flex" }}
-              onClick={confirmLogout}
-            >
-              Sair
-            </Button>
-          </Menu.Item>
-        </Menu>
+          style={{ background: "#072854", color: "white" }}
+          items={menuItems}
+        />
       </Sider>
       <Layout>
-        <Header style={{ height: "40px", ...sidebarStyle }}>
+        <Header style={{ height: "45px", ...sidebarStyle }}>
           <div
             style={{
               display: "flex",
@@ -141,14 +153,24 @@ const SidebarLayout: React.FC<SidebarLayoutProps> = ({ children }) => {
               style={{ color: "white", marginLeft: "-50px" }}
               icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
             />
-            <h1
-              style={{
-                color: "white",
-                fontSize: "18px",
-              }}
-            >
-              Olá, {user?.name}!
-            </h1>
+            <div style={{ display: "flex", alignItems: "center" }}>
+              <h1
+                style={{
+                  color: "white",
+                  fontSize: "16px",
+                  marginRight: "20px",
+                }}
+              >
+                Olá, {user?.name}!
+              </h1>
+              <Popover content={content}>
+                <Avatar
+                  style={{ backgroundColor: "gray", cursor: "pointer" }}
+                  size={28}
+                  icon={<UserOutlined />}
+                />
+              </Popover>
+            </div>
           </div>
         </Header>
         <Content

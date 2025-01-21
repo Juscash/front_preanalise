@@ -36,6 +36,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       }
 
       api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+      console.log(`Bearer ${token}`);
       const response = await api.get("auth/verify_token");
       setUser(response.data);
       setAuthenticated(true);
@@ -65,7 +66,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           },
         }
       );
+
       const { token, user } = response.data;
+
       localStorage.setItem("token", token);
       api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
       setAuthenticated(true);

@@ -1,24 +1,21 @@
-// src/Login.tsx
+import { FC } from "react";
+import { useNavigate } from "react-router-dom";
 
-import React from "react";
-import { Button, Card, Typography, message } from "antd";
+import { Card, message } from "antd";
 
-import logo from "../assets/img/logo.svg";
-import { Link, useNavigate } from "react-router-dom";
 import { GoogleLogin } from "@react-oauth/google";
-
 import { useAuth } from "../contexts/AuthContext";
 
-const { Title } = Typography;
+import logo from "../assets/img/logo.svg";
 
-const Login: React.FC = () => {
+const Login: FC = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
 
   const handleGoogleSuccess = async (credentialResponse: any) => {
     try {
       await login(credentialResponse.credential);
-      navigate("/teste-prompt");
+      navigate("/gerenciador-prompt");
     } catch (error) {
       console.error("Erro no login:", error);
       message.error("Usuário não autorizado");
@@ -29,8 +26,7 @@ const Login: React.FC = () => {
     <div className="login-container">
       <Card className="login-card">
         <div className="login-content">
-          <img src={logo} alt="logo" className="logo-login" />
-
+          <img src={logo} alt="logo" />
           <GoogleLogin
             onSuccess={handleGoogleSuccess}
             onError={() => message.error("Erro ao fazer login com Google")}

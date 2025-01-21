@@ -71,7 +71,7 @@ const ModalHistoricoTeste = ({
   return (
     <Modal
       title="Resultados"
-      visible={visible}
+      open={visible}
       onCancel={onClose}
       footer={null}
       width={1000}

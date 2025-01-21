@@ -18,7 +18,7 @@ export interface MotivosProcesso {
 
 export interface processos {
   numero_processo: string;
-  id: string;
+  id_pipefy: string;
 }
 
 const mockPrompts: Prompt[] = [
@@ -57,120 +57,168 @@ const mockProcessos = [
 ];
 
 export const getPrompts = async (): Promise<Prompt[]> => {
-  // const response = await api.get<Prompt[]>("/prompts");
-  // return response.data;
+  const response = await api.get<Prompt[]>("/prompts/listar");
+  return response.data;
 
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(mockPrompts);
-    }, 1000);
-  });
+  //   return new Promise((resolve) => {
+  //     setTimeout(() => {
+  //       resolve(mockPrompts);
+  //     }, 1000);
+  //   });
+  // };
 };
 
+export const getIdprocess = async (data: {
+  processos: string[];
+  motivo?: string;
+  data_inicio?: string;
+  data_fim?: string;
+}): Promise<processos[]> => {
+  const dataSend = {
+    lista_processos: data.processos,
+    motivo: data.motivo,
+    data_inicio: data.data_inicio,
+    data_fim: data.data_fim,
+  };
+  console.log(dataSend);
+  const response = await api.post<processos[]>(
+    "/prompt_tester/buscar_id_processos",
+    dataSend
+  );
+  return response.data;
+};
 export const createPrompt = async (promptData: PromptCreate): Promise<void> => {
-  // try {
-  //   const response = await api.post("/prompts", promptData);
-  //   if (response.status !== 201) {
-  //     throw new Error("Falha ao cadastrar o prompt");
-  //   }
-  // } catch (error) {
-  //   console.error("Erro ao cadastrar prompt:", error);
-  //   throw error;
-  // }
-
   try {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        // Simulando o cadastro
-        const newPrompt: Prompt = {
-          id: mockPrompts.length + 1,
-          ...promptData,
-          datahora: new Date().toISOString(),
-          ativo: 0,
-        };
-
-        mockPrompts.push(newPrompt);
-
-        resolve();
-      }, 1000);
-    });
+    const response = await api.post("/prompts/gravar", promptData);
+    if (response.status !== 201) {
+      throw new Error("Falha ao cadastrar o prompt");
+    }
   } catch (error) {
     console.error("Erro ao cadastrar prompt:", error);
     throw error;
   }
+
+  // try {
+  //   return new Promise((resolve, reject) => {
+  //     setTimeout(() => {
+  //       // Simulando o cadastro
+  //       const newPrompt: Prompt = {
+  //         id: mockPrompts.length + 1,
+  //         ...promptData,
+  //         datahora: new Date().toISOString(),
+  //         ativo: 0,
+  //       };
+
+  //       mockPrompts.push(newPrompt);
+
+  //       resolve();
+  //     }, 1000);
+  //   });
+  // } catch (error) {
+  //   console.error("Erro ao cadastrar prompt:", error);
+  //   throw error;
+  // }
 };
 
 export const getSaidasProcessos = async (): Promise<MotivosProcesso[]> => {
-  // const response = await api.get<MotivosProcesso[]>("/saidas-processos");
-  // return response.data;
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(mockSaidasProcessos);
-    }, 1000);
-  });
+  const response = await api.get<MotivosProcesso[]>(
+    "prompt_tester/saidas_processos"
+  );
+  return response.data;
+  // return new Promise((resolve) => {
+  //   setTimeout(() => {
+  //     resolve(mockSaidasProcessos);
+  //   }, 1000);
+  // });
 };
 
-export const getProcessosMotivo = async (
-  motivo: string
-): Promise<processos[]> => {
-  // const response = await api.get<processos[]>(`/processos-por-motivo/${motivo}`);
-  // return response.data;
+export const getProcessosMotivo = async ({
+  motivo,
+  data_inicio,
+  data_fim,
+}: {
+  motivo: string;
+  data_inicio: string;
+  data_fim: string;
+}): Promise<processos[]> => {
+  const response = await api.post<processos[]>(
+    `prompt_tester/processos_por_motivo`,
+    {
+      motivo,
+      data_inicio,
+      data_fim,
+    }
+  );
+  return response.data;
 
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      // Retorno dos processos com base no motivo fornecido, ou array vazio se não houver
-      resolve(mockProcessos || []);
-    }, 1000); // delay de 1 segundo
-  });
+  // return new Promise((resolve) => {
+  //   setTimeout(() => {
+  //     // Retorno dos processos com base no motivo fornecido, ou array vazio se não houver
+  //     resolve(mockProcessos || []);
+  //   }, 1000); // delay de 1 segundo
+  // });
 };
 
 export const setAuthToken = (token: string) => {
   api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
 };
 
-export const testPrompt = async (
-  prompt: string,
-  processos: string
-): Promise<any> => {
-  await new Promise((resolve) => setTimeout(resolve, 1000));
+export const getListarTestes = async (): Promise<any> => {
+  const response = await api.get("/prompt_tester/listar_testes");
+  console.log(response.data, "aqqq");
+  return response.data;
+};
 
-  const mockResult = {
-    acuracia: 50,
-    precisao: 50,
-    nbe: 50,
-    cobertura: 50,
-    tableData: [
-      {
-        processo: "1025828392024810041",
-        tribunal: "TJSP",
-        analiseHumana: "Aprovado",
-        dataAH: "20/03/24",
-        justificativaAH: "",
-        analiseAutomacao: "Aprovado",
-        justificativaAutomacao: "",
-      },
-      {
-        processo: "1025828392024810042",
-        tribunal: "TJSP",
-        analiseHumana: "Negado",
-        dataAH: "22/03/24",
-        justificativaAH: "Sem sentença",
-        analiseAutomacao: "Negado",
-        justificativaAutomacao: "",
-      },
-      {
-        processo: "1025828392024810043",
-        tribunal: "TJSP",
-        analiseHumana: "Negado",
-        dataAH: "22/03/24",
-        justificativaAH: "RPV em iminência de pagamento",
-        analiseAutomacao: "Aprovado",
-        justificativaAutomacao: "",
-      },
-    ],
-  };
+export const testPrompt = async (data: {
+  lista_processos: processos[];
+  id_prompt: string;
+}): Promise<any> => {
+  console.log("to aq111");
 
-  return mockResult;
+  console.log(data);
+  const response = await api.post("/prompt_tester/realizar_teste", data);
+
+  console.log("to quii");
+  console.log(response.data);
+  // await new Promise((resolve) => setTimeout(resolve, 1000));
+
+  // const mockResult = {
+  //   acuracia: 50,
+  //   precisao: 50,
+  //   nbe: 50,
+  //   cobertura: 50,
+  //   tableData: [
+  //     {
+  //       processo: "1025828392024810041",
+  //       tribunal: "TJSP",
+  //       analiseHumana: "Aprovado",
+  //       dataAH: "20/03/24",
+  //       justificativaAH: "",
+  //       analiseAutomacao: "Aprovado",
+  //       justificativaAutomacao: "",
+  //     },
+  //     {
+  //       processo: "1025828392024810042",
+  //       tribunal: "TJSP",
+  //       analiseHumana: "Negado",
+  //       dataAH: "22/03/24",
+  //       justificativaAH: "Sem sentença",
+  //       analiseAutomacao: "Negado",
+  //       justificativaAutomacao: "",
+  //     },
+  //     {
+  //       processo: "1025828392024810043",
+  //       tribunal: "TJSP",
+  //       analiseHumana: "Negado",
+  //       dataAH: "22/03/24",
+  //       justificativaAH: "RPV em iminência de pagamento",
+  //       analiseAutomacao: "Aprovado",
+  //       justificativaAutomacao: "",
+  //     },
+  //   ],
+  // };
+
+  //  return mockResult;
 };
 
 export default api;

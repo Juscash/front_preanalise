@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Row, Col } from "antd";
 import Table from "../components/table";
 import { Title } from "../components/typograph";
 import Modal from "../components/modal/historicoTeste";
+import { getListarTestes } from "../services/api";
 
 const data = [
   {
@@ -107,6 +108,14 @@ interface DataRecord {
 const HistoricoTeste = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedRow, setSelectedRow] = useState<DataRecord | null>(null);
+
+  const fetchTestes = async () => {
+    const response = await getListarTestes();
+  };
+
+  useEffect(() => {
+    fetchTestes();
+  }, []);
 
   const handleRowClick = (record: any) => {
     setSelectedRow(record);

@@ -18,8 +18,8 @@ import GerenciadorPrompt from "./pages/gerenciador_prompt";
 
 function App() {
   return (
-    <ConfigProvider>
-      <GoogleOAuthProvider clientId="733436954468-ps2a91fg2l8j7o5nan7kgs1oej0vm9g8.apps.googleusercontent.com">
+    <GoogleOAuthProvider clientId="733436954468-ps2a91fg2l8j7o5nan7kgs1oej0vm9g8.apps.googleusercontent.com">
+      <ConfigProvider>
         <AuthProvider>
           <Router>
             <Routes>
@@ -62,8 +62,8 @@ function App() {
             </Routes>
           </Router>
         </AuthProvider>
-      </GoogleOAuthProvider>
-    </ConfigProvider>
+      </ConfigProvider>
+    </GoogleOAuthProvider>
   );
 }
 
