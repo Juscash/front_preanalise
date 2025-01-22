@@ -1,9 +1,15 @@
+import React from "react";
 import { Doughnut } from "react-chartjs-2";
-import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
+import { Chart as ChartJS, ArcElement, Tooltip, Legend, ChartOptions } from "chart.js";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-const GaugeChart = ({ value, label }: { value: any; label: any }) => {
+interface GaugeChartProps {
+  value: number;
+  label: string;
+}
+
+const GaugeChart: React.FC<GaugeChartProps> = ({ value, label }) => {
   const data = {
     datasets: [
       {
@@ -16,7 +22,7 @@ const GaugeChart = ({ value, label }: { value: any; label: any }) => {
     ],
   };
 
-  const options = {
+  const options: ChartOptions<"doughnut"> = {
     responsive: true,
     maintainAspectRatio: false,
     cutout: "75%",
@@ -31,31 +37,10 @@ const GaugeChart = ({ value, label }: { value: any; label: any }) => {
   };
 
   return (
-    <div style={{ position: "relative", width: "200px", height: "120px" }}>
-      <div
-        style={{
-          fontSize: "16px",
-          color: "#0a3672",
-          textAlign: "center",
-          fontWeight: "bold",
-        }}
-      >
-        {label}
-      </div>
+    <div className="gauge-chart-container">
+      <div className="gauge-chart-label">{label}</div>
       <Doughnut data={data} options={options} />
-      <div
-        style={{
-          position: "absolute",
-          top: "70%",
-          left: "50%",
-          transform: "translate(-50%, -20%)",
-          textAlign: "center",
-        }}
-      >
-        <div style={{ fontSize: "26px", fontWeight: "bold", color: "#0a3672" }}>
-          {value}%
-        </div>
-      </div>
+      <div className="gauge-chart-value">{value.toFixed(1)}%</div>
     </div>
   );
 };

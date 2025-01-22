@@ -1,47 +1,26 @@
+import React from "react";
 import { Tag } from "antd";
 
-const TagInput = ({
-  value,
-  onChange,
-  label,
-}: {
+interface TagInputProps {
   value: string[];
-  onChange: any;
+  onChange: (tags: string[]) => void;
   label: string;
-}) => {
-  const handleClose = (removedTag: any) => {
-    const newTags = value.filter((tag: any) => tag !== removedTag);
+}
+
+const TagInput: React.FC<TagInputProps> = ({ value, onChange, label }) => {
+  const handleClose = (removedTag: string) => {
+    const newTags = value.filter((tag) => tag !== removedTag);
     onChange(newTags);
   };
 
   return (
-    <div>
-      <div
-        style={{
-          marginBottom: 8,
-          fontSize: "16px",
-          color: "#072854",
-          fontWeight: "700",
-        }}
-      >
+    <div className="tag-input-container">
+      <label className="tag-input-label" htmlFor="tags">
         {label}
-      </div>
-      <div
-        style={{
-          padding: 4,
-          border: "1px solid #d9d9d9",
-          borderRadius: 4,
-          minHeight: 80,
-          backgroundColor: "#d9d9d9",
-        }}
-      >
-        {value.map((tag: any) => (
-          <Tag
-            key={tag}
-            closable
-            onClose={() => handleClose(tag)}
-            style={{ margin: 4, color: "#072854" }}
-          >
+      </label>
+      <div className="tag-input-tags">
+        {value.map((tag) => (
+          <Tag key={tag} closable onClose={() => handleClose(tag)} className="tag-input-tag">
             {tag}
           </Tag>
         ))}

@@ -1,10 +1,9 @@
+import React, { useState, useEffect, useCallback } from "react";
 import { Row, Col, Modal, Button, Spin, message } from "antd";
 import Table from "../table";
 import { GaugeChart } from "../graphics";
 import * as XLSX from "xlsx";
 import { getProcessosTeste } from "../../services/api";
-import { useEffect, useState } from "react";
-import type { TableColumnsType } from "antd";
 import dayjs from "dayjs";
 
 interface DataType {
@@ -19,30 +18,37 @@ interface DataType {
   data_ah: string;
 }
 
-const columns: TableColumnsType<DataType> = [
+interface Metricas {
+  acuracia: number;
+  precisaoNegativas: number;
+  nbe: number;
+  cobertura: number;
+}
+
+const columns = [
   {
     title: "Processo",
     dataIndex: "numero_processo",
     key: "numero_processo",
-    sorter: (a, b) => a.numero_processo.length - b.numero_processo.length,
+    sorter: (a: DataType, b: DataType) => a.numero_processo.localeCompare(b.numero_processo),
   },
   {
     title: "Pipefy",
     dataIndex: "id_pipefy",
     key: "id_pipefy",
-    sorter: (a, b) => a.id_pipefy.length - b.id_pipefy.length,
+    sorter: (a: DataType, b: DataType) => a.id_pipefy.localeCompare(b.id_pipefy),
   },
   {
     title: "Tribunal",
     dataIndex: "tribunal",
     key: "tribunal",
-    sorter: (a, b) => a.tribunal.length - b.tribunal.length,
+    sorter: (a: DataType, b: DataType) => a.tribunal.localeCompare(b.tribunal),
   },
   {
     title: "Análise humana",
     dataIndex: "analise_humana",
     key: "analise_humana",
-    sorter: (a, b) => a.analise_humana.length - b.analise_humana.length,
+    sorter: (a: DataType, b: DataType) => a.analise_humana.localeCompare(b.analise_humana),
   },
   {
     title: "Análise automação",
@@ -50,13 +56,12 @@ const columns: TableColumnsType<DataType> = [
     key: "analise_automatica",
   },
   {
-    title: "JustifiCativa AH",
+    title: "Justificativa AH",
     dataIndex: "justificativa_ah",
     key: "justificativa_ah",
   },
-
   {
-    title: "JustifiCativa automação",
+    title: "Justificativa automação",
     dataIndex: "justificativa_aa",
     key: "justificativa_aa",
   },
@@ -64,49 +69,40 @@ const columns: TableColumnsType<DataType> = [
     title: "Data AH",
     dataIndex: "data_ah",
     key: "data_ah",
-    render: (data: string) => (
-      <div style={{ display: "flex", justifyContent: "center" }}>
-        {dayjs(data).format("DD/MM/YYYY")}
-      </div>
-    ),
+    render: (data: string) => <span>{dayjs(data).format("DD/MM/YYYY")}</span>,
   },
 ];
 
-const ModalHistoricoTeste = ({
+interface ModalHistoricoTesteProps {
+  visible: boolean;
+  onClose: () => void;
+  id: string | number;
+  metricas: Metricas;
+}
+
+const ModalHistoricoTeste: React.FC<ModalHistoricoTesteProps> = ({
   visible,
   onClose,
   id,
   metricas,
-}: {
-  visible: boolean;
-  onClose: () => void;
-  id: string | number;
-  metricas: {
-    acuracia: number;
-    precisaoNegativas: number;
-    nbe: number;
-    cobertura: number;
-  };
 }) => {
   const [data, setData] = useState<DataType[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const getProcessos = async () => {
-    const response = await getProcessosTeste(id);
-    setData(response);
-  };
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        await getProcessos();
-      } catch (error) {
-        message.error("Erro ao buscar os processos do teste");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
+  const fetchProcessos = useCallback(async () => {
+    try {
+      const response = await getProcessosTeste(id);
+      setData(response);
+    } catch (error) {
+      message.error("Erro ao buscar os processos do teste");
+    } finally {
+      setLoading(false);
+    }
   }, [id]);
+
+  useEffect(() => {
+    fetchProcessos();
+  }, [fetchProcessos]);
 
   const exportToExcel = () => {
     const ws = XLSX.utils.json_to_sheet(data);
@@ -114,45 +110,27 @@ const ModalHistoricoTeste = ({
     XLSX.utils.book_append_sheet(wb, ws, "Resultados");
     XLSX.writeFile(wb, "resultados_teste_prompt.xlsx");
   };
+
   return (
-    <Modal
-      title="Resultados"
-      open={visible}
-      onCancel={onClose}
-      footer={null}
-      width={1200}
-    >
+    <Modal title="Resultados" open={visible} onCancel={onClose} footer={null} width={1200}>
       <Spin spinning={loading}>
-        <Row
-          gutter={[16, 16]}
-          justify="space-around"
-          style={{ marginTop: "30px", marginBottom: "30px" }}
-        >
+        <Row gutter={[16, 16]} justify="space-around" style={{ marginTop: 30, marginBottom: 30 }}>
           <Col>
-            <GaugeChart value={metricas.acuracia.toFixed(2)} label="Acurácia" />
+            <GaugeChart value={metricas.acuracia} label="Acurácia" />
           </Col>
           <Col>
-            <GaugeChart
-              value={metricas.precisaoNegativas.toFixed(2)}
-              label="Precisão de negativas"
-            />
+            <GaugeChart value={metricas.precisaoNegativas} label="Precisão de negativas" />
           </Col>
           <Col>
-            <GaugeChart value={metricas.nbe.toFixed(2)} label="NBE" />
+            <GaugeChart value={metricas.nbe} label="NBE" />
           </Col>
           <Col>
-            <GaugeChart
-              value={metricas.cobertura.toFixed(2)}
-              label="Cobertura"
-            />
+            <GaugeChart value={metricas.cobertura} label="Cobertura" />
           </Col>
         </Row>
         <Table columns={columns} data={data} bordered rowKey="id_pipefy" />
-        <Row style={{ marginTop: "16px" }}>
-          <Col
-            span={24}
-            style={{ display: "flex", justifyContent: "flex-end" }}
-          >
+        <Row style={{ marginTop: 16 }}>
+          <Col span={24} style={{ display: "flex", justifyContent: "flex-end" }}>
             <Button type="primary" onClick={exportToExcel}>
               Gerar planilha Excel
             </Button>

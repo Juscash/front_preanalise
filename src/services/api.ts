@@ -1,8 +1,10 @@
-import axios from "axios";
+import axios, { AxiosInstance, AxiosResponse } from "axios";
 import { Prompt } from "../models";
 
-const api = axios.create({
-  baseURL: "https://back-preanalise-1083557259488.us-central1.run.app/",
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+const api: AxiosInstance = axios.create({
+  baseURL: API_BASE_URL,
 });
 
 export interface PromptCreate {
@@ -16,171 +18,119 @@ export interface MotivosProcesso {
   id: string;
 }
 
-export interface processos {
+export interface Processo {
   numero_processo: string;
   id_pipefy: string;
 }
 
-const mockPrompts: Prompt[] = [
-  {
-    id: 1,
-    grupo: "Grupo A",
-    descricao: "Descrição do grupo A",
-    prompt: "Prompt A",
-    datahora: "2023-10-01T12:00:00Z",
-    ativo: 1,
-  },
-  {
-    id: 2,
-    grupo: "Grupo B",
-    descricao: "Descrição do grupo B",
-    prompt: "Prompt B",
-    datahora: "2023-10-02T12:00:00Z",
-    ativo: 0,
-  },
-];
-export interface Processos {
+export interface ProcessoId {
   numero_processo: string;
   id: string;
 }
-const mockSaidasProcessos: MotivosProcesso[] = [
-  { motivo_perda: "Perda por extravio", id: "1" },
-  { motivo_perda: "Perda por devolução", id: "2" },
-  { motivo_perda: "Perda por queima", id: "3" },
-];
 
-const mockProcessos = [
-  { numero_processo: "12345", id: "1" },
-  { numero_processo: "67890", id: "2" },
-  { numero_processo: "54321", id: "3" },
-  { numero_processo: "09876", id: "4" },
-];
-
-export const getPrompts = async (): Promise<Prompt[]> => {
-  const response = await api.get<Prompt[]>("/prompts/listar");
-  return response.data;
-
-  //   return new Promise((resolve) => {
-  //     setTimeout(() => {
-  //       resolve(mockPrompts);
-  //     }, 1000);
-  //   });
-  // };
-};
-
-export const getIdprocess = async (data: {
+interface ProcessoFiltro {
   processos: string[];
   motivo?: string;
   data_inicio?: string;
   data_fim?: string;
-}): Promise<processos[]> => {
-  const dataSend = {
-    lista_processos: data.processos,
-    motivo: data.motivo,
-    data_inicio: data.data_inicio,
-    data_fim: data.data_fim,
-  };
-  console.log(dataSend);
-  const response = await api.post<processos[]>(
-    "/prompt_tester/buscar_id_processos",
-    dataSend
-  );
-  return response.data;
+}
+
+interface TestPromptData {
+  lista_processos: Processo[];
+  id_prompt: string;
+}
+
+const handleApiError = (error: any): never => {
+  console.error("API Error:", error);
+  throw error;
 };
+
+export const getPrompts = async (): Promise<Prompt[]> => {
+  try {
+    const response: AxiosResponse<Prompt[]> = await api.get("/prompts/listar");
+    return response.data;
+  } catch (error) {
+    return handleApiError(error);
+  }
+};
+
+export const getIdprocess = async (data: ProcessoFiltro): Promise<Processo[]> => {
+  try {
+    const response: AxiosResponse<Processo[]> = await api.post(
+      "/prompt_tester/buscar_id_processos",
+      data
+    );
+    return response.data;
+  } catch (error) {
+    return handleApiError(error);
+  }
+};
+
 export const createPrompt = async (promptData: PromptCreate): Promise<void> => {
   try {
-    const response = await api.post("/prompts/gravar", promptData);
+    const response: AxiosResponse = await api.post("/prompts/gravar", promptData);
     if (response.status !== 201) {
       throw new Error("Falha ao cadastrar o prompt");
     }
   } catch (error) {
-    console.error("Erro ao cadastrar prompt:", error);
-    throw error;
+    return handleApiError(error);
   }
-
-  // try {
-  //   return new Promise((resolve, reject) => {
-  //     setTimeout(() => {
-  //       // Simulando o cadastro
-  //       const newPrompt: Prompt = {
-  //         id: mockPrompts.length + 1,
-  //         ...promptData,
-  //         datahora: new Date().toISOString(),
-  //         ativo: 0,
-  //       };
-
-  //       mockPrompts.push(newPrompt);
-
-  //       resolve();
-  //     }, 1000);
-  //   });
-  // } catch (error) {
-  //   console.error("Erro ao cadastrar prompt:", error);
-  //   throw error;
-  // }
 };
 
 export const getSaidasProcessos = async (): Promise<MotivosProcesso[]> => {
-  const response = await api.get<MotivosProcesso[]>(
-    "prompt_tester/saidas_processos"
-  );
-  return response.data;
-  // return new Promise((resolve) => {
-  //   setTimeout(() => {
-  //     resolve(mockSaidasProcessos);
-  //   }, 1000);
-  // });
+  try {
+    const response: AxiosResponse<MotivosProcesso[]> = await api.get(
+      "prompt_tester/saidas_processos"
+    );
+    return response.data;
+  } catch (error) {
+    return handleApiError(error);
+  }
 };
 
-export const getProcessosMotivo = async ({
-  motivo,
-  data_inicio,
-  data_fim,
-}: {
-  motivo: string;
-  data_inicio: string;
-  data_fim: string;
-}): Promise<processos[]> => {
-  const response = await api.post<processos[]>(
-    `prompt_tester/processos_por_motivo`,
-    {
-      motivo,
-      data_inicio,
-      data_fim,
-    }
-  );
-  return response.data;
-
-  // return new Promise((resolve) => {
-  //   setTimeout(() => {
-  //     // Retorno dos processos com base no motivo fornecido, ou array vazio se não houver
-  //     resolve(mockProcessos || []);
-  //   }, 1000); // delay de 1 segundo
-  // });
+export const getProcessosMotivo = async (
+  filtro: Omit<ProcessoFiltro, "processos">
+): Promise<Processo[]> => {
+  try {
+    const response: AxiosResponse<Processo[]> = await api.post(
+      "prompt_tester/processos_por_motivo",
+      filtro
+    );
+    return response.data;
+  } catch (error) {
+    return handleApiError(error);
+  }
 };
 
-export const setAuthToken = (token: string) => {
+export const setAuthToken = (token: string): void => {
   api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
 };
 
 export const getListarTestes = async (): Promise<any> => {
-  const response = await api.get("prompt_tester/listar_testes");
-  console.log(response.data, "aqqq");
-  return response.data;
+  try {
+    const response: AxiosResponse = await api.get("prompt_tester/listar_testes");
+    return response.data;
+  } catch (error) {
+    return handleApiError(error);
+  }
 };
 
 export const getProcessosTeste = async (id: string | number): Promise<any> => {
-  const response = await api.get(`prompt_tester/listar_resultados_teste/${id}`);
-  return response.data;
+  try {
+    const response: AxiosResponse = await api.get(`prompt_tester/listar_resultados_teste/${id}`);
+    return response.data;
+  } catch (error) {
+    return handleApiError(error);
+  }
 };
-export const testPrompt = async (data: {
-  lista_processos: processos[];
-  id_prompt: string;
-}): Promise<any> => {
-  console.log(data);
-  const response = await api.post("prompt_tester/realizar_teste", data);
 
-  return response.data;
+export const testPrompt = async (data: TestPromptData): Promise<any> => {
+  try {
+    const response: AxiosResponse = await api.post("prompt_tester/realizar_teste", data);
+    return response.data;
+  } catch (error) {
+    return handleApiError(error);
+  }
 };
 
 export default api;

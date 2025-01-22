@@ -12,12 +12,10 @@ const NovaReanalise: React.FC = () => {
   const [samplePercentage, setSamplePercentage] = useState<string>("");
   const [processesSelected, setProcessesSelected] = useState<number>(0);
 
-  // Objeto com os prompts e seus respectivos textos
   const promptsData: { [key: string]: string } = {
     "Prompt 1":
       "Este é o texto do Prompt 1. Aqui você pode adicionar instruções detalhadas para a análise.",
-    "Prompt 2":
-      "Texto do Prompt 2 com instruções específicas para este tipo de análise.",
+    "Prompt 2": "Texto do Prompt 2 com instruções específicas para este tipo de análise.",
     "Prompt 3": "Prompt 3 contém orientações para um terceiro tipo de análise.",
   };
 
@@ -86,14 +84,10 @@ const NovaReanalise: React.FC = () => {
               style={{ backgroundColor: "#f0f2f5", marginBottom: "16px" }}
               bodyStyle={{ padding: "10px" }}
             >
-              <div style={{ minHeight: "100px" }}>
-                {/* Aqui você pode adicionar a lista de processos se necessário */}
-              </div>
+              <div style={{ minHeight: "100px" }}></div>
             </Card>
             <div style={{ textAlign: "center", marginBottom: "16px" }}>
-              <span style={{ color: "green" }}>
-                147 processos selecionados (30% da base)
-              </span>{" "}
+              <span style={{ color: "green" }}>147 processos selecionados (30% da base)</span>{" "}
               <ReloadOutlined style={{ color: "green" }} />
             </div>
             <Row gutter={16}>

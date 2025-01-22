@@ -82,17 +82,66 @@ textarea::placeholder {
 /* styles.css */
 .ant-btn-success {
     background-color: #52c41a;
-    /* Cor de fundo */
     border-color: #52c41a;
-    /* Cor da borda */
     color: white;
 
-    /* Cor do texto */
     &:hover {
         background-color: #73d13d !important;
-        /* Cor de fundo ao passar o mouse */
+
         border-color: #73d13d !important;
         color: white !important;
-        /* Cor da borda ao passar o mouse */
     }
+}
+
+
+.gauge-chart-container {
+    position: relative;
+    width: 200px;
+    height: 120px;
+}
+
+.gauge-chart-label {
+    font-size: 16px;
+    color: #0a3672;
+    text-align: center;
+    font-weight: bold;
+}
+
+.gauge-chart-value {
+    position: absolute;
+    top: 70%;
+    left: 50%;
+    transform: translate(-50%, -20%);
+    text-align: center;
+    font-size: 26px;
+    font-weight: bold;
+    color: #0a3672;
+}
+
+.tag-input-container {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 16px;
+}
+
+.tag-input-label {
+    margin-bottom: 8px;
+    font-size: 16px;
+    color: #072854;
+    font-weight: 700;
+}
+
+.tag-input-tags {
+    padding: 4px;
+    border: 1px solid #d9d9d9;
+    border-radius: 4px;
+    min-height: 80px;
+    background-color: #d9d9d9;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.tag-input-tag {
+    margin: 4px;
+    color: #072854;
 }

@@ -1,17 +1,17 @@
+import React from "react";
 import { Col, Row, Button } from "antd";
-import Table from "../table";
-import type { TableColumnsType } from "antd";
 import * as XLSX from "xlsx";
-
+import Table from "../table";
 import { Title } from "../typograph";
 import { GaugeChart } from "../graphics";
-type Props = {
+
+interface Props {
   acuracia: number;
   precisao: number;
   nbe: number;
   cobertura: number;
   data: DataType[];
-};
+}
 
 interface DataType {
   id_teste: React.Key;
@@ -25,30 +25,30 @@ interface DataType {
   data_ah: string;
 }
 
-const columns: TableColumnsType<DataType> = [
+const columns = [
   {
     title: "Processo",
     dataIndex: "numero_processo",
     key: "numero_processo",
-    sorter: (a, b) => a.numero_processo.length - b.numero_processo.length,
+    sorter: (a: DataType, b: DataType) => a.numero_processo.localeCompare(b.numero_processo),
   },
   {
     title: "Pipefy",
     dataIndex: "id_pipefy",
     key: "id_pipefy",
-    sorter: (a, b) => a.id_pipefy.length - b.id_pipefy.length,
+    sorter: (a: DataType, b: DataType) => a.id_pipefy.localeCompare(b.id_pipefy),
   },
   {
     title: "Tribunal",
     dataIndex: "tribunal",
     key: "tribunal",
-    sorter: (a, b) => a.tribunal.length - b.tribunal.length,
+    sorter: (a: DataType, b: DataType) => a.tribunal.localeCompare(b.tribunal),
   },
   {
     title: "Análise humana",
     dataIndex: "analise_humana",
     key: "analise_humana",
-    sorter: (a, b) => a.analise_humana.length - b.analise_humana.length,
+    sorter: (a: DataType, b: DataType) => a.analise_humana.localeCompare(b.analise_humana),
   },
   {
     title: "Análise automação",
@@ -56,13 +56,12 @@ const columns: TableColumnsType<DataType> = [
     key: "analise_automatica",
   },
   {
-    title: "JustifiCativa AH",
+    title: "Justificativa AH",
     dataIndex: "justificativa_ah",
     key: "justificativa_ah",
   },
-
   {
-    title: "JustifiCativa automação",
+    title: "Justificativa automação",
     dataIndex: "justificativa_aa",
     key: "justificativa_aa",
   },
@@ -72,42 +71,35 @@ const columns: TableColumnsType<DataType> = [
     key: "data_ah",
   },
 ];
-const TestPrompt = (result: Props) => {
+
+const TestPrompt: React.FC<Props> = ({ acuracia, precisao, nbe, cobertura, data }) => {
   const exportToExcel = () => {
-    const ws = XLSX.utils.json_to_sheet(result.data);
+    const ws = XLSX.utils.json_to_sheet(data);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Resultados");
     XLSX.writeFile(wb, "resultados_teste_prompt.xlsx");
   };
 
+  const metrics = [
+    { label: "Acurácia", value: acuracia },
+    { label: "Precisão de negativas", value: precisao },
+    { label: "NBE", value: nbe },
+    { label: "Cobertura", value: cobertura },
+  ];
+
   return (
     <div>
       <Title level={2}>Resultados</Title>
       <Row gutter={[16, 16]} justify="space-around">
-        <Col>
-          <GaugeChart value={result.acuracia.toFixed(2)} label="Acurácia" />
-        </Col>
-        <Col>
-          <GaugeChart
-            value={result.precisao.toFixed(2)}
-            label="Precisão de negativas"
-          />
-        </Col>
-        <Col>
-          <GaugeChart value={result.nbe.toFixed(2)} label="NBE" />
-        </Col>
-        <Col>
-          <GaugeChart value={result.cobertura.toFixed(2)} label="Cobertura" />
-        </Col>
+        {metrics.map((metric) => (
+          <Col key={metric.label}>
+            <GaugeChart value={metric.value} label={metric.label} />
+          </Col>
+        ))}
       </Row>
       <Row style={{ marginTop: "50px" }}>
         <Col span={24}>
-          <Table
-            columns={columns}
-            data={result.data}
-            bordered
-            rowKey="id_pipefy"
-          />
+          <Table columns={columns} data={data} bordered rowKey="id_pipefy" />
         </Col>
       </Row>
       <Row style={{ marginTop: "16px" }}>
