@@ -1,22 +1,14 @@
-import { Title } from "../components/typograph";
-import { useState, useEffect } from "react";
-import { Row, Col, Button, message, Spin, Modal } from "antd";
-import {
-  Select,
-  CustomDateRange,
-  TextArea,
-  TagInput,
-} from "../components/form";
+import React, { useState, useEffect, useCallback } from "react";
+import { Row, Col, Button, message, Spin, Modal, Form } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
-import TestPrompt from "../components/results/test_prompt";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
+import { Title } from "../components/typograph";
+import { Select, CustomDateRange, TextArea, TagInput } from "../components/form";
+import TestPrompt from "../components/results/test_prompt";
+import AddProcessosModal from "../components/modal/AddProcessosModal";
+
 import { useAuth } from "../contexts/AuthContext";
-
-dayjs.extend(customParseFormat);
-
-const dateFormat = "DD/MM/YYYY";
-
 import {
   getPrompts,
   getSaidasProcessos,
@@ -26,143 +18,125 @@ import {
 } from "../services/api";
 import { Prompt } from "../models";
 
-type FilterProcess = {
+dayjs.extend(customParseFormat);
+
+const DEFAULT_START_DATE = "2024-09-01";
+const DEFAULT_END_DATE = "2024-09-30";
+
+interface FilterProcess {
   motivo: string;
   data_inicio: string;
   data_fim: string;
-};
+}
 
-type prrocessoID = {
+interface ProcessoID {
   numero_processo: string;
   id_pipefy: string;
-};
-const TestePrompt = () => {
+}
+
+interface ResultData {
+  acuracia: number;
+  precisao: number;
+  nbe: number;
+  cobertura: number;
+  data: any[];
+}
+
+const TestePrompt: React.FC = () => {
   const { user } = useAuth();
 
-  const [loading, setLoading] = useState(false);
+  const [form] = Form.useForm();
+
+  const [loading, setLoading] = useState<boolean>(false);
   const [prompts, setPrompts] = useState<Prompt[]>([]);
   const [promptSelected, setPromptSelected] = useState<Prompt | null>(null);
   const [saidasProcessos, setSaidasProcessos] = useState<any[]>([]);
-  const [visible, setVisible] = useState(false);
+  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [listProcessos, setListProcessos] = useState<string>("");
-  console.log(user, "aquiiii");
   const [filterProcessModal, setFilterProcessModal] = useState<FilterProcess>({
     motivo: "",
-    data_inicio: "2024-09-01",
-    data_fim: "2024-09-30",
+    data_inicio: DEFAULT_START_DATE,
+    data_fim: DEFAULT_END_DATE,
   });
-
   const [filterProcess, setFilterProcess] = useState<FilterProcess>({
     motivo: "",
-    data_inicio: "2024-09-01",
-    data_fim: "2024-09-30",
+    data_inicio: DEFAULT_START_DATE,
+    data_fim: DEFAULT_END_DATE,
   });
-  const [viewResult, setViewResult] = useState(false);
-  const [processos, setProcessos] = useState<prrocessoID[]>([]);
-  const [load, setLoad] = useState(true);
-  const [resultData, setResultData] = useState<{
-    acuracia?: number;
-    precisao?: number;
-    nbe?: number;
-    cobertura?: number;
-    data: any[];
-  }>({
-    acuracia: 60,
-    precisao: 50,
-    nbe: 15,
-    cobertura: 40,
+  const [isResultVisible, setIsResultVisible] = useState<boolean>(false);
+  const [processos, setProcessos] = useState<ProcessoID[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [resultData, setResultData] = useState<ResultData>({
+    acuracia: 0,
+    precisao: 0,
+    nbe: 0,
+    cobertura: 0,
     data: [],
   });
 
-  const idProcess = async () => {
+  const fetchInitialData = useCallback(async () => {
+    try {
+      const [promptsData, saidasData] = await Promise.all([getPrompts(), getSaidasProcessos()]);
+      setPrompts(promptsData);
+      setSaidasProcessos(saidasData);
+    } catch (error) {
+      console.error("Erro ao buscar dados:", error);
+      message.error("Erro ao carregar dados iniciais");
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchInitialData();
+  }, [fetchInitialData]);
+
+  const handleIdProcess = async () => {
     setLoading(true);
     const arrayProcess = listProcessos.replace(/\s+/g, "").trim().split(",");
-    const send: {
-      processos: string[];
-      motivo?: string;
-      data_inicio: string;
-      data_fim: string;
-    } = {
+    const requestData = {
       processos: arrayProcess,
       data_inicio: filterProcessModal.data_inicio,
       data_fim: filterProcessModal.data_fim,
+      ...(filterProcessModal.motivo && { motivo: filterProcessModal.motivo }),
     };
-    if (filterProcessModal.motivo && filterProcessModal.motivo !== "") {
-      send.motivo = filterProcessModal.motivo;
-    }
 
     try {
-      const data = await getIdprocess(send);
-
+      const data = await getIdprocess(requestData);
       const newData = [...processos, ...data];
-
-      const uniqueData = newData.reduce(
-        (acc: prrocessoID[], curr: prrocessoID) => {
-          const existingItem = acc.find(
-            (item) => item.id_pipefy === curr.id_pipefy
-          );
-          if (!existingItem) {
-            acc.push(curr);
-          }
-          return acc;
-        },
-        []
-      );
+      const uniqueData = newData.reduce((accumulator: ProcessoID[], current: ProcessoID) => {
+        if (!accumulator.find((item) => item.id_pipefy === current.id_pipefy)) {
+          accumulator.push(current);
+        }
+        return accumulator;
+      }, []);
 
       setProcessos(uniqueData);
       setListProcessos("");
-      setVisible(false);
+      setIsModalVisible(false);
     } catch (error) {
       console.error("Erro ao buscar processos por motivo:", error);
       message.error("Erro ao buscar processos por motivo");
     } finally {
       setLoading(false);
-      console.log(arrayProcess);
     }
   };
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [promptsData, saidasData] = await Promise.all([
-          getPrompts(),
-          getSaidasProcessos(),
-        ]);
 
-        setPrompts(promptsData);
-        setSaidasProcessos(saidasData);
-      } catch (error) {
-        console.error("Erro ao buscar dados:", error);
-        message.error("Erro ao carregar dados iniciais");
-      } finally {
-        setLoad(false);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  const changeFilterProcess = (motivo: string) => {
-    setFilterProcess({ ...filterProcess, motivo });
+  const handleFilterChange = (motivo: string, isModal: boolean = false) => {
+    const setterFunction = isModal ? setFilterProcessModal : setFilterProcess;
+    setterFunction((prevState) => ({ ...prevState, motivo }));
   };
-  const changeFilterProcessModal = (motivo: string) => {
-    setFilterProcessModal({ ...filterProcessModal, motivo });
-  };
+
   const fetchProcessosMotivo = async () => {
     setLoading(true);
-
     try {
-      const data = await getProcessosMotivo({
-        motivo: filterProcess.motivo,
-        data_inicio: filterProcess.data_inicio,
-        data_fim: filterProcess.data_fim,
-      });
-
+      const data = await getProcessosMotivo(filterProcess);
       setProcessos(
-        data.map((p) => {
-          return { numero_processo: p.numero_processo, id_pipefy: p.id_pipefy };
-        })
+        data.map((processo) => ({
+          numero_processo: processo.numero_processo,
+          id_pipefy: processo.id_pipefy,
+        }))
       );
-      console.log(data);
     } catch (error) {
       console.error("Erro ao buscar processos por motivo:", error);
       message.error("Erro ao buscar processos por motivo");
@@ -171,23 +145,22 @@ const TestePrompt = () => {
     }
   };
 
-  const startTest = async () => {
+  const handleStartTest = async () => {
     if (!promptSelected) {
       message.error("Selecione um prompt");
       return;
     }
 
-    setViewResult(false);
+    setIsResultVisible(false);
     setLoading(true);
     try {
-      const data = {
+      const testData = {
         lista_processos: processos,
-        id_prompt: `${promptSelected?.id}` || "0",
+        id_prompt: promptSelected?.id?.toString() || "",
         usuario: user?.name,
       };
 
-      const response = await testPrompt(data);
-
+      const response = await testPrompt(testData);
       setResultData({
         data: response.outputs,
         acuracia: Number(response.metricas.acuracia) * 100,
@@ -196,7 +169,7 @@ const TestePrompt = () => {
         nbe: Number(response.metricas.nbe) * 100,
       });
 
-      setViewResult(true);
+      setIsResultVisible(true);
     } catch (error) {
       console.error("Erro ao iniciar teste:", error);
       message.error("Erro ao iniciar teste");
@@ -206,221 +179,156 @@ const TestePrompt = () => {
   };
 
   const handleDateChange = (
-    dates: [dayjs.Dayjs | null, dayjs.Dayjs | null]
+    dates: [dayjs.Dayjs | null, dayjs.Dayjs | null],
+    isModal: boolean = false
   ) => {
     if (dates[0] && dates[1]) {
-      setFilterProcess((prev) => ({
-        ...prev,
-        data_inicio: dates[0] ? dates[0].format("YYYY-MM-DD") : "",
-        data_fim: dates[1] ? dates[1].format("YYYY-MM-DD") : "",
-      }));
-    }
-  };
-
-  const handleDateChangeModal = (
-    dates: [dayjs.Dayjs | null, dayjs.Dayjs | null]
-  ) => {
-    if (dates[0] && dates[1]) {
-      setFilterProcessModal((prev) => ({
-        ...prev,
-        data_inicio: dates[0] ? dates[0].format("YYYY-MM-DD") : "",
-        data_fim: dates[1] ? dates[1].format("YYYY-MM-DD") : "",
-      }));
+      const newDates = {
+        data_inicio: dates[0].format("YYYY-MM-DD"),
+        data_fim: dates[1].format("YYYY-MM-DD"),
+      };
+      const setterFunction = isModal ? setFilterProcessModal : setFilterProcess;
+      setterFunction((prevState) => ({ ...prevState, ...newDates }));
     }
   };
 
   return (
     <>
       <Title level={1}>Teste de prompt</Title>
-      <Spin spinning={load}>
-        <div style={{ padding: "0px 20px" }}>
-          <Row gutter={16}>
-            <Col span={16}>
-              <Select
-                label="Selecione um prompt"
-                name="prompts"
-                selects={prompts.map((p) => ({
-                  value: `${p.id}`,
-                  name: `${p.grupo} - ${p.descricao} - ${p.datahora}`,
-                }))}
-                onChange={(value) => {
-                  let select = prompts.find((p) => `${p.id}` == value);
-                  setPromptSelected(select || null);
-                }}
-              />
-            </Col>
-          </Row>
-          <Row gutter={16}>
-            <Col span={16}>
-              <TextArea
-                label="Prompt selecionado"
-                name="prompt_selected"
-                rows={6}
-                value={promptSelected?.prompt}
-              />
-            </Col>
-          </Row>
-          <Row gutter={16}>
-            <Col span={7}>
-              <Select
-                label="Selecionar saída de processo"
-                name="saida"
-                selects={saidasProcessos.map((p) => ({
-                  value: `${p.motivo_perda}`,
-                  name: `${p.motivo_perda}`,
-                }))}
-                onChange={changeFilterProcess}
-              />
-            </Col>
-            <Col span={6}>
-              <CustomDateRange
-                label="Selecionar a data o processo"
-                name="dataprocesso"
-                defaultValue={[
-                  dayjs("01/09/2024", dateFormat),
-                  dayjs("30/09/2024", dateFormat),
-                ]}
-                onChange={(dates, dateStrings) =>
-                  handleDateChange(
-                    dates as [dayjs.Dayjs | null, dayjs.Dayjs | null]
-                  )
-                }
-              />
-            </Col>
-            <Col
-              span={3}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "end",
-              }}
-            >
-              <Button
-                type="primary"
-                icon={<SearchOutlined />}
-                iconPosition={"end"}
-                onClick={fetchProcessosMotivo}
-                loading={loading}
+      <Form form={form} layout="vertical">
+        <Spin spinning={isLoading}>
+          <div style={{ padding: "0px 20px" }}>
+            <Row gutter={16}>
+              <Col span={16}>
+                <Select
+                  label="Selecione um prompt"
+                  name="prompts"
+                  selects={prompts.map((prompt) => ({
+                    value: (prompt.id ?? "").toString(),
+                    name: `${prompt.grupo} - ${prompt.descricao} - ${prompt.datahora}`,
+                  }))}
+                  onChange={(value) => {
+                    const selectedPrompt = prompts.find(
+                      (prompt) => prompt.id?.toString() === value
+                    );
+                    setPromptSelected(selectedPrompt || null);
+                  }}
+                />
+              </Col>
+            </Row>
+            <Row gutter={16}>
+              <Col span={16}>
+                <TextArea
+                  label="Prompt selecionado"
+                  name="prompt_selected"
+                  rows={6}
+                  value={promptSelected?.prompt}
+                />
+              </Col>
+            </Row>
+            <Row gutter={16}>
+              <Col span={7}>
+                <Select
+                  label="Selecionar saída de processo"
+                  name="saida"
+                  selects={saidasProcessos.map((saida) => ({
+                    value: saida.motivo_perda,
+                    name: saida.motivo_perda,
+                  }))}
+                  onChange={(value) => handleFilterChange(value)}
+                />
+              </Col>
+              <Col span={6}>
+                <CustomDateRange
+                  label="Selecionar a data o processo"
+                  name="dataprocesso"
+                  defaultValue={[dayjs(DEFAULT_START_DATE), dayjs(DEFAULT_END_DATE)]}
+                  onChange={(dates) =>
+                    handleDateChange(dates as [dayjs.Dayjs | null, dayjs.Dayjs | null])
+                  }
+                />
+              </Col>
+              <Col
+                span={3}
+                style={{ display: "flex", alignItems: "center", justifyContent: "end" }}
               >
-                Buscar
-              </Button>
-            </Col>
-          </Row>
-          <Row gutter={16}>
-            <Col span={16}>
-              <TagInput
-                label={`Processos (${processos.length})`}
-                value={processos.map(
-                  (p) => `${p.numero_processo}-(${p.id_pipefy})`
-                )}
-                onChange={(newTags: any) => {
-                  const newProcessos = newTags.map((tag: any) => {
-                    const [numero_processo, id_pipefy] = tag.split("-(");
-                    return {
-                      numero_processo,
-                      id_pipefy: id_pipefy.slice(0, -1),
-                    };
-                  });
-                  setProcessos(newProcessos);
-                }}
-              />
-            </Col>
-          </Row>
-          <Row style={{ marginTop: "16px" }}>
-            <Col
-              span={16}
-              style={{ display: "flex", justifyContent: "flex-end" }}
-            >
-              <Button
-                color="danger"
-                variant="solid"
-                onClick={() => setProcessos([])}
-                disabled={loading}
-                loading={loading}
-                style={{ marginRight: "16px" }}
-              >
-                Limpar processos
-              </Button>
-
-              <Button
-                onClick={() => setVisible(true)}
-                disabled={loading}
-                loading={loading}
-                style={{ marginRight: "16px" }}
-                className="ant-btn-success"
-              >
-                Adicionar processos
-              </Button>
-              <Button
-                type="primary"
-                onClick={startTest}
-                disabled={loading}
-                loading={loading}
-              >
-                Iniciar teste
-              </Button>
-            </Col>
-          </Row>
-        </div>
-      </Spin>
-      {viewResult && (
-        <TestPrompt
-          acuracia={resultData.acuracia || 0}
-          precisao={resultData.precisao || 0}
-          nbe={resultData.nbe || 0}
-          cobertura={resultData.cobertura || 0}
-          data={resultData.data}
-        />
-      )}
-      <Modal
-        open={visible}
-        onCancel={() => setVisible(false)}
-        width={700}
-        okText="Adicionar processos"
-        onOk={idProcess}
-        confirmLoading={loading}
-      >
-        <Row gutter={16}>
-          <Col span={12}>
-            <Select
-              label="Selecionar saída de processo"
-              name="saida"
-              selects={saidasProcessos.map((p) => ({
-                value: `${p.motivo_perda}`,
-                name: `${p.motivo_perda}`,
-              }))}
-              onChange={changeFilterProcessModal}
-            />
-          </Col>
-          <Col span={9}>
-            <CustomDateRange
-              label="Selecionar a data o processo"
-              name="dataprocesso"
-              defaultValue={[
-                dayjs("01/09/2024", dateFormat),
-                dayjs("30/09/2024", dateFormat),
-              ]}
-              onChange={(dates, dateStrings) =>
-                handleDateChangeModal(
-                  dates as [dayjs.Dayjs | null, dayjs.Dayjs | null]
-                )
-              }
-            />
-          </Col>
-        </Row>
-        <Row>
-          <Col span={24}>
-            <TextArea
-              label={`Lista de Processos (${
-                listProcessos.split(",").filter((p) => p.trim() !== "").length
-              })`}
-              value={listProcessos}
-              name="novosProcessos"
-              onChange={(e) => setListProcessos(e.target.value)}
-            />
-          </Col>
-        </Row>
-      </Modal>
+                <Button
+                  type="primary"
+                  icon={<SearchOutlined />}
+                  onClick={fetchProcessosMotivo}
+                  loading={loading}
+                >
+                  Buscar
+                </Button>
+              </Col>
+            </Row>
+            <Row gutter={16}>
+              <Col span={16}>
+                <TagInput
+                  label={`Processos (${processos.length})`}
+                  value={processos.map(
+                    (processo) => `${processo.numero_processo}-(${processo.id_pipefy})`
+                  )}
+                  onChange={(newTags: string[]) => {
+                    const newProcessos = newTags.map((tag) => {
+                      const [numero_processo, id_pipefy] = tag.split("-(");
+                      return {
+                        numero_processo,
+                        id_pipefy: id_pipefy.slice(0, -1),
+                      };
+                    });
+                    setProcessos(newProcessos);
+                  }}
+                />
+              </Col>
+            </Row>
+            <Row style={{ marginTop: "16px" }}>
+              <Col span={16} style={{ display: "flex", justifyContent: "flex-end" }}>
+                <Button
+                  danger
+                  onClick={() => setProcessos([])}
+                  disabled={loading}
+                  loading={loading}
+                  style={{ marginRight: "16px" }}
+                >
+                  Limpar processos
+                </Button>
+                <Button
+                  onClick={() => setIsModalVisible(true)}
+                  disabled={loading}
+                  loading={loading}
+                  style={{ marginRight: "16px" }}
+                  className="ant-btn-success"
+                >
+                  Adicionar processos
+                </Button>
+                <Button
+                  type="primary"
+                  onClick={handleStartTest}
+                  disabled={loading}
+                  loading={loading}
+                >
+                  Iniciar teste
+                </Button>
+              </Col>
+            </Row>
+          </div>
+        </Spin>
+      </Form>
+      {isResultVisible && <TestPrompt {...resultData} />}
+      <AddProcessosModal
+        isVisible={isModalVisible}
+        onCancel={() => setIsModalVisible(false)}
+        onOk={handleIdProcess}
+        loading={loading}
+        saidasProcessos={saidasProcessos}
+        handleFilterChange={(value) => handleFilterChange(value, true)}
+        handleDateChange={(dates) => handleDateChange(dates, true)}
+        listProcessos={listProcessos}
+        setListProcessos={setListProcessos}
+        defaultStartDate={DEFAULT_START_DATE}
+        defaultEndDate={DEFAULT_END_DATE}
+      />
     </>
   );
 };
