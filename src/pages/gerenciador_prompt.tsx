@@ -1,39 +1,47 @@
-import { useState, useEffect } from "react";
-import { Title } from "../components/typograph";
+import React, { useState, useEffect, useCallback } from "react";
 import { Row, Col, Button, message, Form, Spin } from "antd";
+import dayjs from "dayjs";
+import { Title } from "../components/typograph";
 import { Select, Input, TextArea } from "../components/form";
 import { getPrompts, createPrompt } from "../services/api";
 import { Prompt } from "../models";
-import dayjs from "dayjs";
 
-const GerenciadorPrompt = () => {
+interface NewPrompt {
+  nome: string;
+  descricao: string;
+  prompt: string;
+}
+
+const GerenciadorPrompt: React.FC = () => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
-  const [load, setLoad] = useState(true);
-
+  const [fetching, setFetching] = useState(true);
   const [prompts, setPrompts] = useState<Prompt[]>([]);
-  const [newPrompt, setNewPrompt] = useState({
+  const [newPrompt, setNewPrompt] = useState<NewPrompt>({
     nome: "",
     descricao: "",
     prompt: "",
   });
 
-  const fetchPrompts = async () => {
+  const fetchPrompts = useCallback(async () => {
     try {
-      const prompts = await getPrompts();
-      setPrompts(prompts);
-      setLoad(false);
+      const fetchedPrompts = await getPrompts();
+      setPrompts(fetchedPrompts);
     } catch (error) {
       console.error("Erro ao buscar prompts:", error);
       message.error("Erro ao buscar prompts");
+    } finally {
+      setFetching(false);
     }
-  };
+  }, []);
 
-  const formatDate = (date: string) => {
-    return dayjs(date).format("DD/MM/YYYY - HH:mm");
-  };
+  useEffect(() => {
+    fetchPrompts();
+  }, [fetchPrompts]);
 
-  const SavePrompt = async () => {
+  const formatDate = (date: string) => dayjs(date).format("DD/MM/YYYY - HH:mm");
+
+  const handleSavePrompt = async () => {
     const { nome, descricao, prompt } = newPrompt;
     if (!nome || !descricao || !prompt) {
       return message.error("Por favor, preencha todos os campos obrigatórios");
@@ -52,24 +60,24 @@ const GerenciadorPrompt = () => {
     }
   };
 
-  useEffect(() => {
-    fetchPrompts();
-  }, []);
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setNewPrompt((prev) => ({ ...prev, [name]: value }));
+  };
 
-  const change = (
-    e:
-      | React.ChangeEvent<HTMLInputElement>
-      | React.ChangeEvent<HTMLTextAreaElement>
-  ) => {
-    setNewPrompt({ ...newPrompt, [e.target.name]: e.target.value });
+  const handleSelectChange = (value: string) => {
+    const selectedPrompt = prompts.find((p) => `${p.id}` === value);
+    if (selectedPrompt) {
+      setNewPrompt((prev) => ({ ...prev, prompt: selectedPrompt.prompt }));
+    }
   };
 
   return (
     <>
       <Title level={1}>Gerenciador de prompts</Title>
-      <Spin spinning={load}>
+      <Spin spinning={fetching}>
         <div style={{ padding: "0px 20px" }}>
-          <Form form={form} layout="vertical" onFinish={SavePrompt}>
+          <Form form={form} layout="vertical" onFinish={handleSavePrompt}>
             <Row gutter={16}>
               <Col span={16}>
                 <Select
@@ -77,17 +85,9 @@ const GerenciadorPrompt = () => {
                   name="prompts"
                   selects={prompts.map((p) => ({
                     value: `${p.id}`,
-                    name: `${p.grupo} - ${p.descricao} - ${formatDate(
-                      p.datahora
-                    )}`,
+                    name: `${p.grupo} - ${p.descricao} - ${formatDate(p.datahora)}`,
                   }))}
-                  onChange={(value) =>
-                    setNewPrompt({
-                      ...newPrompt,
-                      prompt:
-                        prompts.find((p) => `${p.id}` == value)?.prompt || "",
-                    })
-                  }
+                  onChange={handleSelectChange}
                 />
               </Col>
             </Row>
@@ -98,7 +98,7 @@ const GerenciadorPrompt = () => {
                   name="nome"
                   required
                   value={newPrompt.nome}
-                  onChange={(e) => change(e)}
+                  onChange={handleInputChange}
                   disabled={loading}
                 />
               </Col>
@@ -108,7 +108,7 @@ const GerenciadorPrompt = () => {
                   name="descricao"
                   required
                   value={newPrompt.descricao}
-                  onChange={(e) => change(e)}
+                  onChange={handleInputChange}
                   disabled={loading}
                 />
               </Col>
@@ -120,22 +120,14 @@ const GerenciadorPrompt = () => {
                   name="prompt"
                   rows={6}
                   value={newPrompt.prompt}
-                  onChange={(e) => change(e)}
+                  onChange={handleInputChange}
                   disabled={loading}
                 />
               </Col>
             </Row>
             <Row style={{ marginTop: "16px" }}>
-              <Col
-                span={16}
-                style={{ display: "flex", justifyContent: "flex-end" }}
-              >
-                <Button
-                  type="primary"
-                  htmlType="submit"
-                  disabled={loading}
-                  loading={loading}
-                >
+              <Col span={16} style={{ display: "flex", justifyContent: "flex-end" }}>
+                <Button type="primary" htmlType="submit" disabled={loading} loading={loading}>
                   Gravar Prompt
                 </Button>
               </Col>

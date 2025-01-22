@@ -1,4 +1,3 @@
-import React from "react";
 import { Doughnut } from "react-chartjs-2";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 
@@ -53,9 +52,7 @@ const GaugeChart = ({ value, label }: { value: any; label: any }) => {
           textAlign: "center",
         }}
       >
-        <div style={{ fontSize: "26px", fontWeight: "bold", color: "#0a3672" }}>
-          {value}%
-        </div>
+        <div style={{ fontSize: "26px", fontWeight: "bold", color: "#0a3672" }}>{value}%</div>
       </div>
     </div>
   );

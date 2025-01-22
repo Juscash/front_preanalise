@@ -1,15 +1,14 @@
-import React, {
-  createContext,
-  useState,
-  useContext,
-  useEffect,
-  useCallback,
-} from "react";
+import React, { createContext, useState, useContext, useEffect, useCallback } from "react";
 import api from "../services/api";
+
+interface User {
+  name: string;
+  email: string;
+}
 
 interface AuthContextData {
   authenticated: boolean;
-  user: { name: string; email: string } | null;
+  user: User | null;
   login: (googleToken: string) => Promise<void>;
   logout: () => void;
   verifyToken: () => Promise<boolean>;
@@ -18,35 +17,29 @@ interface AuthContextData {
 
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [authenticated, setAuthenticated] = useState(false);
-  const [user, setUser] = useState<{ name: string; email: string } | null>(
-    null
-  );
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   const verifyToken = useCallback(async (): Promise<boolean> => {
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        setLoading(false);
-        return false;
-      }
-
-      api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-      console.log(`Bearer ${token}`);
-      const response = await api.get("auth/verify_token");
-      setUser(response.data);
-      setAuthenticated(true);
+    const token = localStorage.getItem("token");
+    if (!token) {
       setLoading(false);
+      return false;
+    }
 
+    try {
+      api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+      const { data } = await api.get<User>("auth/verify_token");
+      setUser(data);
+      setAuthenticated(true);
       return true;
     } catch (error) {
       console.error("Erro na verificação do token:", error);
-      setLoading(false);
       return false;
+    } finally {
+      setLoading(false);
     }
   }, []);
 
@@ -54,9 +47,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     verifyToken();
   }, [verifyToken]);
 
-  const login = async (googleToken: string) => {
+  const login = async (googleToken: string): Promise<void> => {
     try {
-      const response = await api.post(
+      const { data } = await api.post<{ token: string; user: User }>(
         "auth/google",
         { token: googleToken },
         {
@@ -67,32 +60,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         }
       );
 
-      const { token, user } = response.data;
-
-      localStorage.setItem("token", token);
-      api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+      localStorage.setItem("token", data.token);
+      api.defaults.headers.common["Authorization"] = `Bearer ${data.token}`;
       setAuthenticated(true);
-      setUser(user);
+      setUser(data.user);
     } catch (error) {
       console.error("Erro na autenticação:", error);
       throw error;
     }
   };
 
-  const logout = () => {
+  const logout = useCallback(() => {
     localStorage.removeItem("token");
     api.defaults.headers.common["Authorization"] = "";
     setAuthenticated(false);
     setUser(null);
+  }, []);
+
+  const contextValue = {
+    authenticated,
+    user,
+    login,
+    logout,
+    verifyToken,
+    loading,
   };
 
-  return (
-    <AuthContext.Provider
-      value={{ authenticated, user, login, logout, verifyToken, loading }}
-    >
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>;
 };
 
 export const useAuth = () => useContext(AuthContext);

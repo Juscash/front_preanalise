@@ -1,13 +1,13 @@
 import React from "react";
 import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
-import { LoadingPage } from "../components/loading";
+import { Spin } from "antd";
 
 const PrivateRoute: React.FC = () => {
   const { authenticated, loading } = useAuth();
 
   if (loading) {
-    return <LoadingPage />;
+    return <Spin fullscreen tip="Carregando..." size="large" />;
   }
 
   return authenticated ? <Outlet /> : <Navigate to="/login" />;
