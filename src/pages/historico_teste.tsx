@@ -3,9 +3,9 @@ import { Row, Col, Tag, Spin, message } from "antd";
 import dayjs from "dayjs";
 import Table from "../components/table";
 import { Title } from "../components/typograph";
-import Modal from "../components/modal/historicoTeste";
-import { getListarTestes } from "../services/api";
+import { getListarTestes, getProcessosTeste } from "../services/api";
 import { ColumnsType } from "antd/es/table";
+import ProcessoDetalhes from "../components/results/ProcessoDetalhes";
 
 interface DataRecord {
   acuracia: string;
@@ -32,16 +32,12 @@ const statusColor = {
 } as const;
 
 const HistoricoTeste: React.FC = () => {
-  const [isModalVisible, setIsModalVisible] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [idTeste, setIdTeste] = useState<string | null>(null);
   const [data, setData] = useState<DataRecord[]>([]);
-  const [metricas, setMetricas] = useState<Metricas>({
-    acuracia: 0,
-    precisaoNegativas: 0,
-    nbe: 0,
-    cobertura: 0,
-  });
+  const [selectedTest, setSelectedTest] = useState<DataRecord | null>(null);
+  const [processos, setProcessos] = useState<any[]>([]);
+  const [processosLoading, setProcessosLoading] = useState(false);
+
   const createFilters = (data: DataRecord[], key: keyof DataRecord) => {
     const uniqueValues = Array.from(new Set(data.map((item) => item[key])));
     return uniqueValues.map((value) => ({ text: value, value: value }));
@@ -63,15 +59,23 @@ const HistoricoTeste: React.FC = () => {
     fetchTestes();
   }, [fetchTestes]);
 
-  const handleRowClick = (record: DataRecord) => {
-    setIdTeste(record.id_teste);
-    setMetricas({
-      acuracia: Number(record.acuracia) * 100,
-      precisaoNegativas: Number(record.precisao_negativas) * 100,
-      nbe: Number(record.nbe) * 100,
-      cobertura: 0,
-    });
-    setIsModalVisible(true);
+  const handleRowClick = async (record: DataRecord) => {
+    setSelectedTest(record);
+    setProcessosLoading(true);
+    try {
+      const response = await getProcessosTeste(record.id_teste);
+      setProcessos(response);
+    } catch (error) {
+      console.error("Erro ao buscar processos do teste:", error);
+      message.error("Falha ao carregar os processos do teste");
+    } finally {
+      setProcessosLoading(false);
+    }
+  };
+
+  const handleVoltar = () => {
+    setSelectedTest(null);
+    setProcessos([]);
   };
 
   const columns: ColumnsType<DataRecord> = useMemo(
@@ -174,22 +178,25 @@ const HistoricoTeste: React.FC = () => {
   return (
     <>
       <Title level={1}>Histórico de teste de prompt</Title>
-      <Spin spinning={loading}>
+      <Spin spinning={loading || processosLoading}>
         <div>
-          <Row style={{ marginTop: "30px" }}>
-            <Col span={24}>
-              <Table columns={columns} data={data} bordered rowKey="id_teste" />
-            </Col>
-          </Row>
+          {!selectedTest ? (
+            <Row style={{ marginTop: "30px" }}>
+              <Col span={24}>
+                <Table columns={columns} data={data} bordered rowKey="id_teste" />
+              </Col>
+            </Row>
+          ) : (
+            <>
+              <ProcessoDetalhes
+                selectedTest={selectedTest}
+                processos={processos}
+                onVoltar={handleVoltar}
+              />
+            </>
+          )}
         </div>
       </Spin>
-      <Modal
-        key={idTeste}
-        visible={isModalVisible}
-        onClose={() => setIsModalVisible(false)}
-        id={idTeste ?? "0"}
-        metricas={metricas}
-      />
     </>
   );
 };
