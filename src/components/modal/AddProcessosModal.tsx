@@ -30,6 +30,14 @@ const AddProcessosModal: React.FC<AddProcessosModalProps> = ({
   defaultStartDate,
   defaultEndDate,
 }) => {
+  const countProcessos = (text: string): number => {
+    if (text.includes(",")) {
+      return text.split(",").filter((processo) => processo.trim() !== "").length;
+    } else {
+      return text.split("\n").filter((processo) => processo.trim() !== "").length;
+    }
+  };
+
   return (
     <Modal
       open={isVisible}
@@ -43,6 +51,7 @@ const AddProcessosModal: React.FC<AddProcessosModalProps> = ({
         <Col span={12}>
           <Select
             label="Selecionar saída de processo"
+            allowClear
             name="saida"
             selects={saidasProcessos.map((saida) => ({
               value: saida.motivo_perda,
@@ -65,9 +74,7 @@ const AddProcessosModal: React.FC<AddProcessosModalProps> = ({
       <Row>
         <Col span={24}>
           <TextArea
-            label={`Lista de Processos (${
-              listProcessos.split(",").filter((processo) => processo.trim() !== "").length
-            })`}
+            label={`Lista de Processos (${countProcessos(listProcessos)})`}
             value={listProcessos}
             name="novosProcessos"
             onChange={(event) => setListProcessos(event.target.value)}

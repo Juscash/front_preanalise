@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Row, Col, Button, message, Spin, Modal, Form } from "antd";
+import { Row, Col, Button, message, Spin, Form } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
@@ -93,9 +93,19 @@ const TestePrompt: React.FC = () => {
 
   const handleIdProcess = async () => {
     setLoading(true);
-    const arrayProcess = listProcessos.replace(/\s+/g, "").trim().split(",");
+    const arrayProcess = listProcessos.includes(",")
+      ? listProcessos
+          .replace(/\s+/g, "")
+          .split(",")
+          .map((p) => p.trim())
+          .filter((p) => p !== "")
+      : listProcessos
+          .split("\n")
+          .map((p) => p.trim())
+          .filter((p) => p !== "");
+
     const requestData = {
-      processos: arrayProcess,
+      lista_processos: arrayProcess,
       data_inicio: filterProcessModal.data_inicio,
       data_fim: filterProcessModal.data_fim,
       ...(filterProcessModal.motivo && { motivo: filterProcessModal.motivo }),
@@ -203,6 +213,7 @@ const TestePrompt: React.FC = () => {
                 <Select
                   label="Selecione um prompt"
                   name="prompts"
+                  allowClear
                   selects={prompts.map((prompt) => ({
                     value: (prompt.id ?? "").toString(),
                     name: `${prompt.grupo} - ${prompt.descricao} - ${prompt.datahora}`,
@@ -236,6 +247,7 @@ const TestePrompt: React.FC = () => {
                     name: saida.motivo_perda,
                   }))}
                   onChange={(value) => handleFilterChange(value)}
+                  allowClear
                 />
               </Col>
               <Col span={6}>

@@ -8,9 +8,8 @@ const { TextArea } = Input;
 
 const NovaReanalise: React.FC = () => {
   const [selectedPrompt, setSelectedPrompt] = useState<string | null>(null);
-  const [selectedPeriod, setSelectedPeriod] = useState<string | null>(null);
+
   const [samplePercentage, setSamplePercentage] = useState<string>("");
-  const [processesSelected, setProcessesSelected] = useState<number>(0);
 
   const promptsData: { [key: string]: string } = {
     "Prompt 1":
@@ -56,7 +55,6 @@ const NovaReanalise: React.FC = () => {
             <Select
               style={{ width: "100%", marginBottom: "16px" }}
               placeholder="Selecionar período"
-              onChange={(value) => setSelectedPeriod(value)}
             >
               {periods.map((period, index) => (
                 <Option key={index} value={period}>

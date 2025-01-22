@@ -3,12 +3,8 @@ import { Table } from "antd";
 
 type SizeType = TableProps["size"];
 type ColumnsType<T extends object> = GetProp<TableProps<T>, "columns">;
-type TablePagination<T extends object> = NonNullable<
-  Exclude<TableProps<T>["pagination"], boolean>
->;
-type TablePaginationPosition = NonNullable<
-  TablePagination<any>["position"]
->[number];
+type TablePagination<T extends object> = NonNullable<Exclude<TableProps<T>["pagination"], boolean>>;
+type TablePaginationPosition = NonNullable<TablePagination<any>["position"]>[number];
 type ExpandableConfig<T extends object> = TableProps<T>["expandable"];
 type TableRowSelection<T extends object> = TableProps<T>["rowSelection"];
 
@@ -89,11 +85,18 @@ const TableDefault = ({
     <>
       <Table
         {...tableProps}
-        pagination={{ position: [top, bottom], pageSize: 5 }}
+        pagination={{
+          position: [top, bottom],
+          pageSize: 5,
+          showSizeChanger: true,
+          showQuickJumper: true,
+          showTotal: (total, range) => `${range[0]}-${range[1]} de ${total} itens`,
+        }}
         columns={tableColumns}
         dataSource={hasData ? data : []}
         scroll={scroll}
         {...(rowKey ? { rowKey } : {})}
+        style={{ overflowX: "auto" }}
       />
     </>
   );

@@ -10,11 +10,15 @@ const AntdContext = ({ children }: { children: ReactNode }) => {
         token: {
           colorPrimary: "#0a3672",
           colorSuccess: "#52c41a",
+          colorError: "#ff4d4f",
+          colorWarning: "#faad14",
         },
         components: {
           Table: {
-            headerBg: "#c5c3c3",
+            headerBg: "#f0f2f5",
             headerColor: "#0a3672",
+            rowHoverBg: "#e6f7ff",
+            borderColor: "#d9d9d9",
           },
           Button: {
             colorPrimaryHover: "#1890ff",

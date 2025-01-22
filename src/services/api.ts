@@ -29,7 +29,7 @@ export interface ProcessoId {
 }
 
 interface ProcessoFiltro {
-  processos: string[];
+  lista_processos: string[];
   motivo?: string;
   data_inicio?: string;
   data_fim?: string;
@@ -89,7 +89,7 @@ export const getSaidasProcessos = async (): Promise<MotivosProcesso[]> => {
 };
 
 export const getProcessosMotivo = async (
-  filtro: Omit<ProcessoFiltro, "processos">
+  filtro: Omit<ProcessoFiltro, "lista_processos">
 ): Promise<Processo[]> => {
   try {
     const response: AxiosResponse<Processo[]> = await api.post(
