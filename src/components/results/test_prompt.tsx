@@ -14,22 +14,29 @@ type Props = {
 };
 
 interface DataType {
-  key: React.Key;
-  processo: string;
+  id_teste: React.Key;
+  numero_processo: string;
+  id_pipefy: string;
   tribunal: string;
-  analiseHumana: string;
-  dataAH: string;
-  justificativaAH: string;
-  analiseAutomacao: string;
-  justificativaAutomacao: string;
+  analise_humana: string;
+  analise_automatica: string;
+  justificativa_ah: string;
+  justificativa_aa: string;
+  data_ah: string;
 }
 
 const columns: TableColumnsType<DataType> = [
   {
     title: "Processo",
-    dataIndex: "processo",
-    key: "processo",
-    sorter: (a, b) => a.processo.length - b.processo.length,
+    dataIndex: "numero_processo",
+    key: "numero_processo",
+    sorter: (a, b) => a.numero_processo.length - b.numero_processo.length,
+  },
+  {
+    title: "Pipefy",
+    dataIndex: "id_pipefy",
+    key: "id_pipefy",
+    sorter: (a, b) => a.id_pipefy.length - b.id_pipefy.length,
   },
   {
     title: "Tribunal",
@@ -39,29 +46,30 @@ const columns: TableColumnsType<DataType> = [
   },
   {
     title: "Análise humana",
-    dataIndex: "analiseHumana",
-    key: "analiseHumana",
-    sorter: (a, b) => a.analiseHumana.length - b.analiseHumana.length,
-  },
-  {
-    title: "Data AH",
-    dataIndex: "dataAH",
-    key: "dataAH",
-  },
-  {
-    title: "JustifiCativa AH",
-    dataIndex: "justificativaAH",
-    key: "justificativaAH",
+    dataIndex: "analise_humana",
+    key: "analise_humana",
+    sorter: (a, b) => a.analise_humana.length - b.analise_humana.length,
   },
   {
     title: "Análise automação",
-    dataIndex: "analiseAutomacao",
-    key: "analiseAutomacao",
+    dataIndex: "analise_automatica",
+    key: "analise_automatica",
   },
   {
+    title: "JustifiCativa AH",
+    dataIndex: "justificativa_ah",
+    key: "justificativa_ah",
+  },
+
+  {
     title: "JustifiCativa automação",
-    dataIndex: "justificativaAutomacao",
-    key: "justificativaAutomacao",
+    dataIndex: "justificativa_aa",
+    key: "justificativa_aa",
+  },
+  {
+    title: "Data AH",
+    dataIndex: "data_ah",
+    key: "data_ah",
   },
 ];
 const TestPrompt = (result: Props) => {
@@ -77,21 +85,29 @@ const TestPrompt = (result: Props) => {
       <Title level={2}>Resultados</Title>
       <Row gutter={[16, 16]} justify="space-around">
         <Col>
-          <GaugeChart value={result.acuracia} label="Acurácia" />
+          <GaugeChart value={result.acuracia.toFixed(2)} label="Acurácia" />
         </Col>
         <Col>
-          <GaugeChart value={result.precisao} label="Precisão de negativas" />
+          <GaugeChart
+            value={result.precisao.toFixed(2)}
+            label="Precisão de negativas"
+          />
         </Col>
         <Col>
-          <GaugeChart value={result.nbe} label="NBE" />
+          <GaugeChart value={result.nbe.toFixed(2)} label="NBE" />
         </Col>
         <Col>
-          <GaugeChart value={result.cobertura} label="Cobertura" />
+          <GaugeChart value={result.cobertura.toFixed(2)} label="Cobertura" />
         </Col>
       </Row>
       <Row style={{ marginTop: "50px" }}>
         <Col span={24}>
-          <Table columns={columns} data={result.data} bordered />
+          <Table
+            columns={columns}
+            data={result.data}
+            bordered
+            rowKey="id_pipefy"
+          />
         </Col>
       </Row>
       <Row style={{ marginTop: "16px" }}>

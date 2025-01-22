@@ -32,6 +32,7 @@ interface TableDefaultProps {
   data: any;
   footerText?: string;
   titleText?: string;
+  rowKey?: string;
 }
 
 const TableDefault = ({
@@ -54,6 +55,7 @@ const TableDefault = ({
   xScroll = undefined,
   columns = [],
   data,
+  rowKey = undefined,
 }: TableDefaultProps) => {
   const scroll: { x?: number | string; y?: number | string } = {};
   if (yScroll) {
@@ -91,6 +93,7 @@ const TableDefault = ({
         columns={tableColumns}
         dataSource={hasData ? data : []}
         scroll={scroll}
+        {...(rowKey ? { rowKey } : {})}
       />
     </>
   );

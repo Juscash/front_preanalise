@@ -164,61 +164,23 @@ export const setAuthToken = (token: string) => {
 };
 
 export const getListarTestes = async (): Promise<any> => {
-  const response = await api.get("/prompt_tester/listar_testes");
+  const response = await api.get("prompt_tester/listar_testes");
   console.log(response.data, "aqqq");
   return response.data;
 };
 
+export const getProcessosTeste = async (id: string | number): Promise<any> => {
+  const response = await api.get(`prompt_tester/listar_resultados_teste/${id}`);
+  return response.data;
+};
 export const testPrompt = async (data: {
   lista_processos: processos[];
   id_prompt: string;
 }): Promise<any> => {
-  console.log("to aq111");
-
   console.log(data);
-  const response = await api.post("/prompt_tester/realizar_teste", data);
+  const response = await api.post("prompt_tester/realizar_teste", data);
 
-  console.log("to quii");
-  console.log(response.data);
-  // await new Promise((resolve) => setTimeout(resolve, 1000));
-
-  // const mockResult = {
-  //   acuracia: 50,
-  //   precisao: 50,
-  //   nbe: 50,
-  //   cobertura: 50,
-  //   tableData: [
-  //     {
-  //       processo: "1025828392024810041",
-  //       tribunal: "TJSP",
-  //       analiseHumana: "Aprovado",
-  //       dataAH: "20/03/24",
-  //       justificativaAH: "",
-  //       analiseAutomacao: "Aprovado",
-  //       justificativaAutomacao: "",
-  //     },
-  //     {
-  //       processo: "1025828392024810042",
-  //       tribunal: "TJSP",
-  //       analiseHumana: "Negado",
-  //       dataAH: "22/03/24",
-  //       justificativaAH: "Sem sentença",
-  //       analiseAutomacao: "Negado",
-  //       justificativaAutomacao: "",
-  //     },
-  //     {
-  //       processo: "1025828392024810043",
-  //       tribunal: "TJSP",
-  //       analiseHumana: "Negado",
-  //       dataAH: "22/03/24",
-  //       justificativaAH: "RPV em iminência de pagamento",
-  //       analiseAutomacao: "Aprovado",
-  //       justificativaAutomacao: "",
-  //     },
-  //   ],
-  // };
-
-  //  return mockResult;
+  return response.data;
 };
 
 export default api;

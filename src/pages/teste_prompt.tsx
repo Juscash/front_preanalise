@@ -11,6 +11,7 @@ import { SearchOutlined } from "@ant-design/icons";
 import TestPrompt from "../components/results/test_prompt";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
+import { useAuth } from "../contexts/AuthContext";
 
 dayjs.extend(customParseFormat);
 
@@ -36,13 +37,15 @@ type prrocessoID = {
   id_pipefy: string;
 };
 const TestePrompt = () => {
+  const { user } = useAuth();
+
   const [loading, setLoading] = useState(false);
   const [prompts, setPrompts] = useState<Prompt[]>([]);
   const [promptSelected, setPromptSelected] = useState<Prompt | null>(null);
   const [saidasProcessos, setSaidasProcessos] = useState<any[]>([]);
   const [visible, setVisible] = useState(false);
   const [listProcessos, setListProcessos] = useState<string>("");
-
+  console.log(user, "aquiiii");
   const [filterProcessModal, setFilterProcessModal] = useState<FilterProcess>({
     motivo: "",
     data_inicio: "2024-09-01",
@@ -68,118 +71,7 @@ const TestePrompt = () => {
     precisao: 50,
     nbe: 15,
     cobertura: 40,
-    data: [
-      {
-        key: "1",
-        processo: "10238293520241010041",
-        tribunal: "TJSP",
-        analiseHumana: "Aprovado",
-        dataAH: "20/03/24",
-        justificativaAH: "",
-        analiseAutomacao: "Aprovado",
-        justificativaAutomacao: "",
-      },
-      {
-        key: "2",
-        processo: "10238293520241010041",
-        tribunal: "TJSP",
-        analiseHumana: "Negado",
-        dataAH: "22/03/24",
-        justificativaAH: "Sem sentença",
-        analiseAutomacao: "Negado",
-        justificativaAutomacao: "",
-      },
-      {
-        key: "3",
-        processo: "10238293520241010041",
-        tribunal: "TJSP",
-        analiseHumana: "Negado",
-        dataAH: "22/03/24",
-        justificativaAH: "RPV em iminência de pagamento",
-        analiseAutomacao: "Aprovado",
-        justificativaAutomacao: "",
-      },
-      {
-        key: "4",
-        processo: "10238293520241010041",
-        tribunal: "TJSP",
-        analiseHumana: "Negado",
-        dataAH: "22/03/24",
-        justificativaAH: "RPV em iminência de pagamento",
-        analiseAutomacao: "Aprovado",
-        justificativaAutomacao: "",
-      },
-      {
-        key: "5",
-        processo: "10238293520241010041",
-        tribunal: "TJSP",
-        analiseHumana: "Negado",
-        dataAH: "22/03/24",
-        justificativaAH: "RPV em iminência de pagamento",
-        analiseAutomacao: "Aprovado",
-        justificativaAutomacao: "",
-      },
-      {
-        key: "6",
-        processo: "10238293520241010041",
-        tribunal: "TJSP",
-        analiseHumana: "Negado",
-        dataAH: "22/03/24",
-        justificativaAH: "RPV em iminência de pagamento",
-        analiseAutomacao: "Aprovado",
-        justificativaAutomacao: "",
-      },
-      {
-        key: "7",
-        processo: "10238293520241010041",
-        tribunal: "TJSP",
-        analiseHumana: "Negado",
-        dataAH: "22/03/24",
-        justificativaAH: "RPV em iminência de pagamento",
-        analiseAutomacao: "Aprovado",
-        justificativaAutomacao: "",
-      },
-      {
-        key: "8",
-        processo: "10238293520241010041",
-        tribunal: "TJSP",
-        analiseHumana: "Negado",
-        dataAH: "22/03/24",
-        justificativaAH: "RPV em iminência de pagamento",
-        analiseAutomacao: "Aprovado",
-        justificativaAutomacao: "",
-      },
-      {
-        key: "9",
-        processo: "10238293520241010041",
-        tribunal: "TJSP",
-        analiseHumana: "Negado",
-        dataAH: "22/03/24",
-        justificativaAH: "RPV em iminência de pagamento",
-        analiseAutomacao: "Aprovado",
-        justificativaAutomacao: "",
-      },
-      {
-        key: "10",
-        processo: "10238293520241010041",
-        tribunal: "TJSP",
-        analiseHumana: "Negado",
-        dataAH: "22/03/24",
-        justificativaAH: "RPV em iminência de pagamento",
-        analiseAutomacao: "Aprovado",
-        justificativaAutomacao: "",
-      },
-      {
-        key: "11",
-        processo: "10238293520241010041",
-        tribunal: "TJSP",
-        analiseHumana: "Negado",
-        dataAH: "22/03/24",
-        justificativaAH: "RPV em iminência de pagamento",
-        analiseAutomacao: "Aprovado",
-        justificativaAutomacao: "",
-      },
-    ],
+    data: [],
   });
 
   const idProcess = async () => {
@@ -280,14 +172,29 @@ const TestePrompt = () => {
   };
 
   const startTest = async () => {
+    if (!promptSelected) {
+      message.error("Selecione um prompt");
+      return;
+    }
+
+    setViewResult(false);
     setLoading(true);
     try {
       const data = {
         lista_processos: processos,
         id_prompt: `${promptSelected?.id}` || "0",
+        usuario: user?.name,
       };
+
       const response = await testPrompt(data);
-      console.log(response, "res");
+
+      setResultData({
+        data: response.outputs,
+        acuracia: Number(response.metricas.acuracia) * 100,
+        cobertura: 0,
+        precisao: Number(response.metricas.precisao_negativas) * 100,
+        nbe: Number(response.metricas.nbe) * 100,
+      });
 
       setViewResult(true);
     } catch (error) {
@@ -295,7 +202,6 @@ const TestePrompt = () => {
       message.error("Erro ao iniciar teste");
     } finally {
       setLoading(false);
-      setViewResult(true);
     }
   };
 

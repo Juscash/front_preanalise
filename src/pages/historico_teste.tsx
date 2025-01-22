@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
-import { Row, Col } from "antd";
+import { Row, Col, Tag, Spin } from "antd";
 import Table from "../components/table";
 import { Title } from "../components/typograph";
 import Modal from "../components/modal/historicoTeste";
 import { getListarTestes } from "../services/api";
+import dayjs from "dayjs";
 
 const data = [
   {
@@ -93,24 +94,45 @@ const data = [
 ];
 
 interface DataRecord {
-  key: string;
-  experimento: string;
-  dia: string;
-  usuario: string;
-  tamanhoAmostra: string;
   acuracia: string;
-  precisaoNegativas: string;
-  status: JSX.Element;
+  data_aa: string;
+  usuario: string;
+  id_teste: string;
   nbe: string;
-  cobertura: string;
+  nome_prompt: string;
+  precisao_negativas: string;
+  status: string;
+  tamanho_amostra: string;
 }
+
+const statusColor = (status: string) => {
+  switch (status) {
+    case "Em andamento":
+      return <Tag color="processing">{status}</Tag>;
+    case "Finalizado":
+      return <Tag color="success">{status}</Tag>;
+    default:
+      return <Tag>{status}</Tag>;
+  }
+};
 
 const HistoricoTeste = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [selectedRow, setSelectedRow] = useState<DataRecord | null>(null);
+
+  const [loading, setLoading] = useState(true);
+  const [id_teste, setIdTeste] = useState<string | null>(null);
+  const [data, setData] = useState<DataRecord[]>([]);
+  const [metricas, setMetricas] = useState({
+    acuracia: 0,
+    precisaoNegativas: 0,
+    nbe: 0,
+    cobertura: 0,
+  });
 
   const fetchTestes = async () => {
     const response = await getListarTestes();
+    setLoading(false);
+    setData(response);
   };
 
   useEffect(() => {
@@ -118,7 +140,15 @@ const HistoricoTeste = () => {
   }, []);
 
   const handleRowClick = (record: any) => {
-    setSelectedRow(record);
+    console.log(record);
+    setIdTeste(record.id_teste);
+    setMetricas({
+      acuracia: Number(record.acuracia) * 100,
+      precisaoNegativas: Number(record.precisao_negativas) * 100,
+      nbe: Number(record.nbe) * 100,
+      cobertura: 0,
+    });
+
     setIsModalVisible(true);
   };
 
@@ -126,21 +156,88 @@ const HistoricoTeste = () => {
     setIsModalVisible(false);
   };
   const columns = [
-    { title: "Experimento", dataIndex: "experimento", key: "experimento" },
-    { title: "Dia", dataIndex: "dia", key: "dia" },
-    { title: "Usuário", dataIndex: "usuario", key: "usuario" },
     {
-      title: "Tamanho da amostra",
-      dataIndex: "tamanhoAmostra",
-      key: "tamanhoAmostra",
+      title: "Experimento",
+      dataIndex: "nome_prompt",
+      key: "nome_prompt",
+      sorter: (a: any, b: any) => a.nome_prompt.length - b.nome_prompt.length,
+      render: (nome: string) => (
+        <div style={{ display: "flex", justifyContent: "center" }}>{nome}</div>
+      ),
     },
-    { title: "Acurácia", dataIndex: "acuracia", key: "acuracia" },
+    {
+      title: "Dia do teste",
+      dataIndex: "data_aa",
+      key: "data_aa",
+      render: (data: string) => (
+        <div style={{ display: "flex", justifyContent: "center" }}>
+          {dayjs(data).format("DD/MM/YYYY")}
+        </div>
+      ),
+    },
+    {
+      title: "Amostra",
+      dataIndex: "tamanho_amostra",
+      key: "tamanho_amostra",
+      render: (tamanho: string) => (
+        <div style={{ display: "flex", justifyContent: "center" }}>
+          {tamanho}
+        </div>
+      ),
+    },
+    {
+      title: "Acurácia",
+      dataIndex: "acuracia",
+      key: "acuracia",
+
+      render: (acuracia: string) => (
+        <div style={{ display: "flex", justifyContent: "center" }}>
+          {(Number(acuracia) * 100).toFixed(2)}%
+        </div>
+      ),
+    },
+
     {
       title: "Precisão de negativas",
-      dataIndex: "precisaoNegativas",
-      key: "precisaoNegativas",
+      dataIndex: "precisao_negativas",
+      key: "precisao_negativas",
+
+      render: (precisao: string) => (
+        <div style={{ display: "flex", justifyContent: "center" }}>
+          {(Number(precisao) * 100).toFixed(2)}%
+        </div>
+      ),
     },
-    { title: "Status", dataIndex: "status", key: "status" },
+    {
+      title: "NBE",
+      dataIndex: "nbe",
+      key: "nbe",
+      render: (nbe: string) => (
+        <div style={{ display: "flex", justifyContent: "center" }}>
+          {(Number(nbe) * 100).toFixed(2)}%
+        </div>
+      ),
+    },
+    {
+      title: "Usuário",
+      dataIndex: "usuario",
+      key: "usuario",
+      render: (usuario: string) => (
+        <div style={{ display: "flex", justifyContent: "center" }}>
+          {usuario}
+        </div>
+      ),
+    },
+    {
+      title: "Status",
+      dataIndex: "status",
+      key: "status",
+      render: (status: string) => (
+        <div style={{ display: "flex", justifyContent: "center" }}>
+          {statusColor(status)}
+        </div>
+      ),
+    },
     {
       title: "Ação",
       dataIndex: "action",
@@ -154,14 +251,22 @@ const HistoricoTeste = () => {
   return (
     <>
       <Title level={1}>Histórico de teste de prompt</Title>
-      <div>
-        <Row style={{ marginTop: "30px" }}>
-          <Col span={24}>
-            <Table columns={columns} data={data} bordered />
-          </Col>
-        </Row>
-      </div>
-      <Modal visible={isModalVisible} onClose={handleModalClose} />
+      <Spin spinning={loading}>
+        <div>
+          <Row style={{ marginTop: "30px" }}>
+            <Col span={24}>
+              <Table columns={columns} data={data} bordered rowKey="id_teste" />
+            </Col>
+          </Row>
+        </div>
+      </Spin>
+      <Modal
+        key={id_teste}
+        visible={isModalVisible}
+        onClose={handleModalClose}
+        id={id_teste ?? 0}
+        metricas={metricas}
+      />
     </>
   );
 };
