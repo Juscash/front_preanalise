@@ -8,7 +8,6 @@ import {
   MenuUnfoldOutlined,
   LogoutOutlined,
   ExperimentOutlined,
-  SyncOutlined,
   UserOutlined,
 } from "@ant-design/icons";
 import { useAuth } from "../../contexts/AuthContext";
@@ -39,7 +38,7 @@ const menuItems = [
     icon: <HistoryOutlined />,
     label: "Histórico de Teste",
   },
-  { key: "/nova-reanalise", icon: <SyncOutlined />, label: "Nova reanalise" },
+  // { key: "/nova-reanalise", icon: <SyncOutlined />, label: "Nova reanalise" },
 ];
 
 const SidebarLayout: React.FC<SidebarLayoutProps> = ({ children }) => {
@@ -117,11 +116,7 @@ const SidebarLayout: React.FC<SidebarLayoutProps> = ({ children }) => {
               </h1>
               <Popover
                 content={
-                  <Button
-                    type="primary"
-                    onClick={confirmLogout}
-                    icon={<LogoutOutlined />}
-                  >
+                  <Button type="primary" onClick={confirmLogout} icon={<LogoutOutlined />}>
                     Sair
                   </Button>
                 }
@@ -135,9 +130,7 @@ const SidebarLayout: React.FC<SidebarLayoutProps> = ({ children }) => {
             </div>
           </div>
         </Header>
-        <Content style={{ padding: 24, background: "#fff", minHeight: 280 }}>
-          {children}
-        </Content>
+        <Content style={{ padding: 24, background: "#fff", minHeight: 280 }}>{children}</Content>
       </Layout>
     </Layout>
   );
