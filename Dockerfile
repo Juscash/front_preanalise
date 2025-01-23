@@ -9,7 +9,7 @@ RUN npm ci
 
 COPY . .
 
-ENV VITE_GOOGLE_CLIENT_ID='batatinhateste'
+ENV VITE_GOOGLE_CLIENT_ID={$VITE_GOOGLE_CLIENT_ID}
 
 RUN npm run build
 
