@@ -19,13 +19,6 @@ interface DataRecord {
   tamanho_amostra: string;
 }
 
-interface Metricas {
-  acuracia: number;
-  precisaoNegativas: number;
-  nbe: number;
-  cobertura: number;
-}
-
 const statusColor = {
   "Em andamento": "processing",
   Finalizado: "success",
