@@ -4,9 +4,14 @@ FROM node:22-slim AS build
 WORKDIR /app
 
 COPY package*.json ./
+
 RUN npm ci
 
 COPY . .
+
+RUN echo '${{ secrets.front_secret }}' > .env
+
+
 RUN npm run build
 
 
