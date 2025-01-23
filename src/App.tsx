@@ -12,8 +12,6 @@ import GerenciadorPrompt from "./pages/gerenciador_prompt";
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
-console.log("GOOGLE_CLIENT_IDa", GOOGLE_CLIENT_ID);
-
 const PrivateRoutes = [
   { path: "/teste-prompt", component: TestePrompt },
   { path: "/gerenciador-prompt", component: GerenciadorPrompt },

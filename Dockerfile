@@ -9,7 +9,7 @@ RUN npm ci
 
 COPY . .
 
-ENV VITE_GOOGLE_CLIENT_ID=${_VITE_GOOGLE_CLIENT_ID}
+ENV VITE_GOOGLE_CLIENT_ID=1083557259488-8muncd0e4kd7r3skjdtrp5secjk5hhra.apps.googleusercontent.com, VITE_API_BASE_URL=https://back-preanalise-1083557259488.us-central1.run.app/
 
 RUN npm run build
 
