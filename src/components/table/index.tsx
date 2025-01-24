@@ -87,7 +87,8 @@ const TableDefault = ({
         {...tableProps}
         pagination={{
           position: [top, bottom],
-          pageSize: 5,
+          defaultPageSize: 5,
+          pageSizeOptions: ["5", "10", "20", "50"],
           showSizeChanger: true,
           showQuickJumper: true,
           showTotal: (total, range) => `${range[0]}-${range[1]} de ${total} itens`,

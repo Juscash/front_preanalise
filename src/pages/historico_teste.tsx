@@ -57,6 +57,16 @@ const HistoricoTeste: React.FC = () => {
     setProcessosLoading(true);
     try {
       const response = await getProcessosTeste(record.id_teste);
+      response.sort((a: { analise_humana: string }, b: { analise_humana: string }) => {
+        const aAnalise = a.analise_humana === "Sem análise";
+        const bAnalise = b.analise_humana === "Sem análise";
+
+        if (aAnalise === bAnalise) return 0;
+
+        if (aAnalise) return -1;
+
+        return 1;
+      });
       setProcessos(response);
     } catch (error) {
       console.error("Erro ao buscar processos do teste:", error);

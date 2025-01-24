@@ -1,10 +1,11 @@
 import React, { useMemo } from "react";
-import { Col, Row, Button, Typography } from "antd";
+import { Col, Row, Button, Typography, Tooltip } from "antd";
 import * as XLSX from "xlsx";
 import Table from "../table";
 import { Title } from "../typograph";
 import { GaugeChart } from "../graphics";
 import { ColumnsType } from "antd/es/table";
+import { WarningOutlined } from "@ant-design/icons";
 
 interface Props {
   acuracia: number;
@@ -72,13 +73,21 @@ const TestPrompt: React.FC<Props> = ({ acuracia, precisao, nbe, cobertura, data 
       key: "analise_humana",
       filters: analiseHumanaFilters,
       onFilter: (value, record) => record.analise_humana === value,
-      render: (text: string) => (
-        <Typography.Text
-          type={(colors[text as keyof typeof colors] as "success" | "danger") || "warning"}
-        >
-          {text}
-        </Typography.Text>
-      ),
+      render: (text: string) =>
+        text && text === "Sem análise" ? (
+          <Tooltip title="Não contabilizado para a precisão de negativas!" color="#072854">
+            <Typography.Text type="warning">
+              {" "}
+              <WarningOutlined /> Sem análise humana no Pipefy
+            </Typography.Text>
+          </Tooltip>
+        ) : (
+          <Typography.Text
+            type={(colors[text as keyof typeof colors] as "success" | "danger") || "warning"}
+          >
+            {text}
+          </Typography.Text>
+        ),
     },
     {
       title: "Análise automação",
