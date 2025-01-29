@@ -24,9 +24,9 @@ const TEXT_COLOR = "white";
 
 const menuItems = [
   {
-    key: "/gerenciador-prompt",
+    key: "/gerenciador-parametros",
     icon: <FileTextOutlined />,
-    label: "Gerenciador Prompt",
+    label: "Parâmetros",
   },
   {
     key: "/teste-prompt",

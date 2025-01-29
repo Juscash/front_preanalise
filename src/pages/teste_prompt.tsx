@@ -10,13 +10,13 @@ import AddProcessosModal from "../components/modal/AddProcessosModal";
 
 import { useAuth } from "../contexts/AuthContext";
 import {
-  getPrompts,
+  getParametros,
   getSaidasProcessos,
   getProcessosMotivo,
   testPrompt,
   getIdprocess,
 } from "../services/api";
-import { Prompt } from "../models";
+import { Parametros } from "../models";
 
 dayjs.extend(customParseFormat);
 
@@ -48,8 +48,8 @@ const TestePrompt: React.FC = () => {
   const [form] = Form.useForm();
 
   const [loading, setLoading] = useState<boolean>(false);
-  const [prompts, setPrompts] = useState<Prompt[]>([]);
-  const [promptSelected, setPromptSelected] = useState<Prompt | null>(null);
+  const [prompts, setPrompts] = useState<Parametros[]>([]);
+  const [promptSelected, setPromptSelected] = useState<Parametros | null>(null);
   const [saidasProcessos, setSaidasProcessos] = useState<any[]>([]);
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [listProcessos, setListProcessos] = useState<string>("");
@@ -76,7 +76,10 @@ const TestePrompt: React.FC = () => {
 
   const fetchInitialData = useCallback(async () => {
     try {
-      const [promptsData, saidasData] = await Promise.all([getPrompts(), getSaidasProcessos()]);
+      const [promptsData, saidasData] = await Promise.all([
+        getParametros("a"),
+        getSaidasProcessos(),
+      ]);
       setPrompts(promptsData);
       setSaidasProcessos(saidasData);
     } catch (error) {
@@ -228,7 +231,7 @@ const TestePrompt: React.FC = () => {
                   allowClear
                   selects={prompts.map((prompt) => ({
                     value: (prompt.id ?? "").toString(),
-                    name: `${prompt.grupo} - ${prompt.descricao} - ${prompt.datahora}`,
+                    name: `${prompt.nome} - ${prompt.tipo_parametro} - ${prompt.datahora}`,
                   }))}
                   onChange={(value) => {
                     const selectedPrompt = prompts.find(
@@ -245,7 +248,7 @@ const TestePrompt: React.FC = () => {
                   label="Prompt selecionado"
                   name="prompt_selected"
                   rows={6}
-                  value={promptSelected?.prompt}
+                  value={promptSelected?.tipo_parametro}
                 />
               </Col>
             </Row>

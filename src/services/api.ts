@@ -1,5 +1,5 @@
 import axios, { AxiosInstance, AxiosResponse } from "axios";
-import { Prompt } from "../models";
+import { Parametros, Motores, motorParametros } from "../models";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -7,12 +7,7 @@ const api: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
 });
 
-export interface PromptCreate {
-  grupo: string;
-  descricao: string;
-  prompt: string;
-}
-
+type ParametrosCreate = Pick<Parametros, "nome" | "tipo_parametro" | "valor">;
 export interface MotivosProcesso {
   motivo_perda: string;
   id: string;
@@ -45,9 +40,11 @@ const handleApiError = (error: any): never => {
   throw error;
 };
 
-export const getPrompts = async (): Promise<Prompt[]> => {
+export const getParametros = async (tipo_parametro: string): Promise<Parametros[]> => {
   try {
-    const response: AxiosResponse<Prompt[]> = await api.get("/prompts/listar");
+    const response: AxiosResponse<Parametros[]> = await api.get(
+      `parametros/lista/${tipo_parametro}`
+    );
     return response.data;
   } catch (error) {
     return handleApiError(error);
@@ -66,9 +63,9 @@ export const getIdprocess = async (data: ProcessoFiltro): Promise<Processo[]> =>
   }
 };
 
-export const createPrompt = async (promptData: PromptCreate): Promise<void> => {
+export const createParametros = async (parametrosData: ParametrosCreate): Promise<void> => {
   try {
-    const response: AxiosResponse = await api.post("/prompts/gravar", promptData);
+    const response: AxiosResponse = await api.post("/parametros/gravar", parametrosData);
     if (response.status !== 201) {
       throw new Error("Falha ao cadastrar o prompt");
     }
@@ -127,6 +124,35 @@ export const getProcessosTeste = async (id: string | number): Promise<any> => {
 export const testPrompt = async (data: TestPromptData): Promise<any> => {
   try {
     const response: AxiosResponse = await api.post("prompt_tester/realizar_teste", data);
+    return response.data;
+  } catch (error) {
+    return handleApiError(error);
+  }
+};
+
+export const getTipoParametros = async (): Promise<{ tipo_parametro: string }[]> => {
+  try {
+    const response: AxiosResponse = await api.get("parametros/tipos_parametros");
+    return response.data;
+  } catch (error) {
+    return handleApiError(error);
+  }
+};
+
+export const getMotores = async (): Promise<Motores[]> => {
+  try {
+    const response: AxiosResponse = await api.get("motor/lista");
+    return response.data;
+  } catch (error) {
+    return handleApiError(error);
+  }
+};
+
+export const getMotorParametros = async (tipo_parametro: string): Promise<motorParametros[]> => {
+  try {
+    const response: AxiosResponse = await api.get(
+      `motor/listar_motor_parametros/${tipo_parametro}`
+    );
     return response.data;
   } catch (error) {
     return handleApiError(error);

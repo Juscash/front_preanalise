@@ -16,9 +16,11 @@ const Login: FC = () => {
       return;
     }
     setLoading(true);
+
     try {
       await login(credentialResponse.credential);
-      navigate("/gerenciador-prompt");
+
+      navigate("/gerenciador-parametros");
     } catch (error) {
       console.error("Erro no login:", error);
       message.error("Usuário não autorizado");

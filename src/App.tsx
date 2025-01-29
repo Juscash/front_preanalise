@@ -8,13 +8,13 @@ import Login from "./pages/login";
 import TestePrompt from "./pages/teste_prompt";
 import HistoricoTeste from "./pages/historico_teste";
 import NovaReanalise from "./pages/nova_reanalise";
-import GerenciadorPrompt from "./pages/gerenciador_prompt";
+import GerenciadorParametros from "./pages/gerenciador_parametros";
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 const PrivateRoutes = [
   { path: "/teste-prompt", component: TestePrompt },
-  { path: "/gerenciador-prompt", component: GerenciadorPrompt },
+  { path: "/gerenciador-parametros", component: GerenciadorParametros },
   { path: "/historico-teste", component: HistoricoTeste },
   { path: "/nova-reanalise", component: NovaReanalise },
 ];
