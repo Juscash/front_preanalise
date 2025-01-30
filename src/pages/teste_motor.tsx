@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Row, Col, Button, message, Spin, Form } from "antd";
+import { Row, Col, Button, message, Spin, Form, Tabs } from "antd";
+import type { RadioChangeEvent, TabsProps } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
@@ -15,10 +16,13 @@ import {
   getProcessosMotivo,
   testPrompt,
   getIdprocess,
+  getMotores,
+  getMotorParametrosPorMotor,
 } from "../services/api";
-import { Parametros } from "../models";
+import { Parametros, Motores, MotorComParametros } from "../models";
 
 dayjs.extend(customParseFormat);
+const formatDate = (date: string) => dayjs(date).format("DD/MM/YYYY - HH:mm");
 
 const DEFAULT_START_DATE = "2024-09-01";
 const DEFAULT_END_DATE = "2024-09-30";
@@ -48,8 +52,12 @@ const TestePrompt: React.FC = () => {
   const [form] = Form.useForm();
 
   const [loading, setLoading] = useState<boolean>(false);
+  const [items, setItems] = useState<TabsProps["items"]>([]);
+  const [motores, setMotores] = useState<Motores[]>([]);
   const [prompts, setPrompts] = useState<Parametros[]>([]);
-  const [promptSelected, setPromptSelected] = useState<Parametros | null>(null);
+  const [promptSelected, setPromptSelected] = useState<Parametros[] | null>([]);
+
+  const [motoresComParametros, setMotoresComParametros] = useState<MotorComParametros>();
   const [saidasProcessos, setSaidasProcessos] = useState<any[]>([]);
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [listProcessos, setListProcessos] = useState<string>("");
@@ -74,6 +82,18 @@ const TestePrompt: React.FC = () => {
     data: [],
   });
 
+  const fetchMotores = useCallback(async () => {
+    try {
+      const fetchedMotores = await getMotores();
+      setMotores(fetchedMotores);
+    } catch (error) {
+      console.error("Erro ao buscar motores:", error);
+      message.error("Erro ao buscar motores");
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
   const fetchInitialData = useCallback(async () => {
     try {
       const [promptsData, saidasData] = await Promise.all([
@@ -90,9 +110,30 @@ const TestePrompt: React.FC = () => {
     }
   }, []);
 
+  console.log(promptSelected);
+
+  const fetchMotorParametros = useCallback(async (motorId: string) => {
+    try {
+      const fetchedParametros = await getMotorParametrosPorMotor(motorId);
+      console.log(fetchedParametros);
+      setMotoresComParametros(fetchedParametros);
+      const data = fetchedParametros?.parametros.map((ref) => ({
+        label: ref.tipo_parametro,
+        key: ref.tipo_parametro,
+        children: SelectedComponent(ref),
+      }));
+      setItems(data);
+    } catch (error) {
+      console.error("Erro ao buscar parametros:", error);
+      message.error("Erro ao buscar parametros");
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
-    fetchInitialData();
-  }, [fetchInitialData]);
+    fetchMotores();
+  }, [fetchMotores]);
 
   const handleIdProcess = async () => {
     setLoading(true);
@@ -169,7 +210,7 @@ const TestePrompt: React.FC = () => {
     try {
       const testData = {
         lista_processos: processos,
-        id_prompt: promptSelected?.id?.toString() || "",
+        id_prompt: promptSelected[0]?.id?.toString() || "",
         usuario: user?.name,
       };
 
@@ -217,39 +258,84 @@ const TestePrompt: React.FC = () => {
     }
   };
 
+  const handleMotorChange = async (motorId: string) => {
+    fetchMotorParametros(motorId);
+  };
+
+  const SelectedComponent = (ref: any) => {
+    console.log(ref);
+    return (
+      <>
+        <Select
+          key={ref.tipo_parametro}
+          label={`Selecione um ${ref.tipo_parametro}`}
+          name={ref.tipo_parametro}
+          allowClear
+          selects={ref.parametros.map((param) => ({
+            value: param.id,
+            name: `${param.nome} - ${formatDate(param.dataHora)}`,
+          }))}
+          onChange={(value) => {
+            console.log(value);
+            console.log(ref);
+            const selectedParam = ref.parametros.find((param) => param.id === value);
+            if (selectedParam) console.log(selectedParam);
+            let verifica = promptSelected?.findIndex(
+              (prompt) => prompt.tipo_parametro === ref.tipo_parametro
+            );
+            if (verifica === -1) {
+              if (selectedParam) {
+                setPromptSelected([...(promptSelected || []), selectedParam]);
+              }
+            } else if (verifica && verifica >= 0 && promptSelected) {
+              if (selectedParam) {
+                promptSelected[verifica] = selectedParam;
+              }
+              setPromptSelected([...promptSelected]);
+            } else {
+              message.error("Erro ao selecionar parametro");
+            }
+          }}
+        />
+        <TextArea
+          label={`Valor do parametro ${ref.tipo_parametro}`}
+          name={ref.tipo_parametro}
+          rows={6}
+          value={
+            promptSelected?.find((prompt) => prompt.tipo_parametro === ref.tipo_parametro)?.nome
+          }
+        />
+      </>
+    );
+  };
+
   return (
     <>
-      <Title level={1}>Teste de prompt</Title>
+      <Title level={1}>Teste de motor</Title>
       <Form form={form} layout="vertical">
         <Spin spinning={isLoading}>
           <div style={{ padding: "0px 20px" }}>
             <Row gutter={16}>
               <Col span={16}>
                 <Select
-                  label="Selecione um prompt"
-                  name="prompts"
+                  label="Selecione um motor"
+                  name="motor"
                   allowClear
-                  selects={prompts.map((prompt) => ({
-                    value: (prompt.id ?? "").toString(),
-                    name: `${prompt.nome} - ${prompt.tipo_parametro} - ${prompt.datahora}`,
+                  selects={motores.map((motor) => ({
+                    value: motor.id,
+                    name: motor.nome,
                   }))}
-                  onChange={(value) => {
-                    const selectedPrompt = prompts.find(
-                      (prompt) => prompt.id?.toString() === value
-                    );
-                    setPromptSelected(selectedPrompt || null);
-                  }}
+                  onChange={(value) => handleMotorChange(value)}
                 />
               </Col>
             </Row>
+
+            <Row gutter={16}>
+              <Col span={16}></Col>
+            </Row>
             <Row gutter={16}>
               <Col span={16}>
-                <TextArea
-                  label="Prompt selecionado"
-                  name="prompt_selected"
-                  rows={6}
-                  value={promptSelected?.tipo_parametro}
-                />
+                <Tabs type="card" items={items} />
               </Col>
             </Row>
             <Row gutter={16}>

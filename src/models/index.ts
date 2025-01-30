@@ -1,9 +1,9 @@
 export interface Parametros {
-  id?: string;
+  id: string;
   nome: string;
   tipo_parametro: string;
   valor: string;
-  datahora: string;
+  dataHora: string;
   ativo: 0 | 1;
 }
 
@@ -21,4 +21,15 @@ export interface Motores {
 export interface motorParametros {
   id: string;
   nome: string;
+}
+
+export interface MotorComParametros {
+  id: string;
+  nome: string;
+  descricao: string;
+  url_endpoint: string;
+  parametros: {
+    tipo_parametro: string;
+    parametros: Parametros[];
+  }[];
 }

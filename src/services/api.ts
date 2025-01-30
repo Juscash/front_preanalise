@@ -1,5 +1,5 @@
 import axios, { AxiosInstance, AxiosResponse } from "axios";
-import { Parametros, Motores, motorParametros } from "../models";
+import { Parametros, Motores, motorParametros, MotorComParametros } from "../models";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -154,6 +154,15 @@ export const getMotorParametros = async (tipo_parametro: string): Promise<motorP
       `motor/listar_motor_parametros/${tipo_parametro}`
     );
     return response.data;
+  } catch (error) {
+    return handleApiError(error);
+  }
+};
+
+export const getMotorParametrosPorMotor = async (id_motor: string): Promise<MotorComParametros> => {
+  try {
+    const response: AxiosResponse = await api.get(`motor/listar_motor_com_parametros/${id_motor}`);
+    return response.data[0];
   } catch (error) {
     return handleApiError(error);
   }

@@ -29,9 +29,9 @@ const menuItems = [
     label: "Parâmetros",
   },
   {
-    key: "/teste-prompt",
+    key: "/teste-motor",
     icon: <ExperimentOutlined />,
-    label: "Teste de Prompt",
+    label: "Teste de Motor",
   },
   {
     key: "/historico-teste",
