@@ -1,23 +1,24 @@
 export interface Parametros {
-  id: string;
   nome: string;
-  tipo_parametro: string;
   valor: string;
-  dataHora: string;
-  ativo: 0 | 1;
 }
 
-interface TipoParametro {
-  tipo_parametro: string;
-}
 export interface Motores {
   id: string;
   nome: string;
   descricao: string;
   url_endpoint: string;
-  parametros: TipoParametro[];
+  parametros: Pick<Parametros, "nome">[];
 }
 
+export interface Experimento {
+  id: string;
+  id_motor: string;
+  versao: string;
+  descricao: string;
+  dataHora: string;
+  parametros: Parametros[];
+}
 export interface motorParametros {
   id: string;
   nome: string;

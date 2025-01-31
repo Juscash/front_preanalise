@@ -20,7 +20,7 @@ const Login: FC = () => {
     try {
       await login(credentialResponse.credential);
 
-      navigate("/gerenciador-parametros");
+      navigate("/gerenciador-experimentos");
     } catch (error) {
       console.error("Erro no login:", error);
       message.error("Usuário não autorizado");

@@ -24,14 +24,14 @@ const TEXT_COLOR = "white";
 
 const menuItems = [
   {
-    key: "/gerenciador-parametros",
+    key: "/gerenciador-experimentos",
     icon: <FileTextOutlined />,
-    label: "Parâmetros",
+    label: "Gerenciador de Experimentos",
   },
   {
-    key: "/teste-motor",
+    key: "/teste-experimento",
     icon: <ExperimentOutlined />,
-    label: "Teste de Motor",
+    label: "Teste de Experimento",
   },
   {
     key: "/historico-teste",

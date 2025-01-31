@@ -4,12 +4,12 @@ import type { RadioChangeEvent, TabsProps } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
-import { Title } from "../components/typograph";
-import { Select, CustomDateRange, TextArea, TagInput } from "../components/form";
-import TestPrompt from "../components/results/test_prompt";
-import AddProcessosModal from "../components/modal/AddProcessosModal";
+import { Title } from "../../components/typograph";
+import { Select, CustomDateRange, TextArea, TagInput } from "../../components/form";
+import TestPrompt from "../../components/results/test_prompt";
+import AddProcessosModal from "../../components/modal/AddProcessosModal";
 
-import { useAuth } from "../contexts/AuthContext";
+import { useAuth } from "../../contexts/AuthContext";
 import {
   getParametros,
   getSaidasProcessos,
@@ -18,8 +18,8 @@ import {
   getIdprocess,
   getMotores,
   getMotorParametrosPorMotor,
-} from "../services/api";
-import { Parametros, Motores, MotorComParametros } from "../models";
+} from "../../services/api";
+import { Parametros, Motores, MotorComParametros } from "../../models";
 
 dayjs.extend(customParseFormat);
 const formatDate = (date: string) => dayjs(date).format("DD/MM/YYYY - HH:mm");
@@ -112,7 +112,7 @@ const TestePrompt: React.FC = () => {
 
   console.log(promptSelected);
 
-  const fetchMotorParametros = useCallback(async (motorId: string) => {
+  /*  const fetchMotorParametros = useCallback(async (motorId: string) => {
     try {
       const fetchedParametros = await getMotorParametrosPorMotor(motorId);
       console.log(fetchedParametros);
@@ -129,7 +129,7 @@ const TestePrompt: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, []); */
 
   useEffect(() => {
     fetchMotores();
@@ -199,7 +199,7 @@ const TestePrompt: React.FC = () => {
     }
   };
 
-  const handleStartTest = async () => {
+  /*   const handleStartTest = async () => {
     if (!promptSelected) {
       message.error("Selecione um prompt");
       return;
@@ -242,7 +242,7 @@ const TestePrompt: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }; */
 
   const handleDateChange = (
     dates: [dayjs.Dayjs | null, dayjs.Dayjs | null],
@@ -258,64 +258,64 @@ const TestePrompt: React.FC = () => {
     }
   };
 
-  const handleMotorChange = async (motorId: string) => {
+  /*  const handleMotorChange = async (motorId: string) => {
     fetchMotorParametros(motorId);
-  };
+  }; */
 
-  const SelectedComponent = (ref: any) => {
-    console.log(ref);
-    return (
-      <>
-        <Select
-          key={ref.tipo_parametro}
-          label={`Selecione um ${ref.tipo_parametro}`}
-          name={ref.tipo_parametro}
-          allowClear
-          selects={ref.parametros.map((param) => ({
-            value: param.id,
-            name: `${param.nome} - ${formatDate(param.dataHora)}`,
-          }))}
-          onChange={(value) => {
-            console.log(value);
-            console.log(ref);
-            const selectedParam = ref.parametros.find((param) => param.id === value);
-            if (selectedParam) console.log(selectedParam);
-            let verifica = promptSelected?.findIndex(
-              (prompt) => prompt.tipo_parametro === ref.tipo_parametro
-            );
-            if (verifica === -1) {
-              if (selectedParam) {
-                setPromptSelected([...(promptSelected || []), selectedParam]);
-              }
-            } else if (verifica && verifica >= 0 && promptSelected) {
-              if (selectedParam) {
-                promptSelected[verifica] = selectedParam;
-              }
-              setPromptSelected([...promptSelected]);
-            } else {
-              message.error("Erro ao selecionar parametro");
-            }
-          }}
-        />
-        <TextArea
-          label={`Valor do parametro ${ref.tipo_parametro}`}
-          name={ref.tipo_parametro}
-          rows={6}
-          value={
-            promptSelected?.find((prompt) => prompt.tipo_parametro === ref.tipo_parametro)?.nome
-          }
-        />
-      </>
-    );
-  };
+  //   const SelectedComponent = (ref: any) => {
+  //     console.log(ref);
+  //     return (
+  //       <>
+  //         <Select
+  //           key={ref.tipo_parametro}
+  //           label={`Selecione um ${ref.tipo_parametro}`}
+  //           name={ref.tipo_parametro}
+  //           allowClear
+  //           selects={ref.parametros.map((param) => ({
+  //             value: param.id,
+  //             name: `${param.nome} - ${formatDate(param.dataHora)}`,
+  //           }))}
+  //           onChange={(value) => {
+  //             console.log(value);
+  //             console.log(ref);
+  //             const selectedParam = ref.parametros.find((param) => param.id === value);
+  //             if (selectedParam) console.log(selectedParam);
+  //             let verifica = promptSelected?.findIndex(
+  //               (prompt) => prompt.tipo_parametro === ref.tipo_parametro
+  //             );
+  //             if (verifica === -1) {
+  //               if (selectedParam) {
+  //                 setPromptSelected([...(promptSelected || []), selectedParam]);
+  //               }
+  //             } else if (verifica && verifica >= 0 && promptSelected) {
+  //               if (selectedParam) {
+  //                 promptSelected[verifica] = selectedParam;
+  //               }
+  //               setPromptSelected([...promptSelected]);
+  //             } else {
+  //               message.error("Erro ao selecionar parametro");
+  //             }
+  //           }}
+  //         />
+  //         <TextArea
+  //           label={`Valor do parametro ${ref.tipo_parametro}`}
+  //           name={ref.tipo_parametro}
+  //           rows={6}
+  //           value={
+  //             promptSelected?.find((prompt) => prompt.tipo_parametro === ref.tipo_parametro)?.nome
+  //           }
+  //         />
+  //       </>
+  //     );
+  //   };
 
   return (
     <>
-      <Title level={1}>Teste de motor</Title>
+      <Title level={1}>Teste de Experimento</Title>
       <Form form={form} layout="vertical">
         <Spin spinning={isLoading}>
           <div style={{ padding: "0px 20px" }}>
-            <Row gutter={16}>
+            {/*  <Row gutter={16}>
               <Col span={16}>
                 <Select
                   label="Selecione um motor"
@@ -328,7 +328,7 @@ const TestePrompt: React.FC = () => {
                   onChange={(value) => handleMotorChange(value)}
                 />
               </Col>
-            </Row>
+            </Row> */}
 
             <Row gutter={16}>
               <Col span={16}></Col>
@@ -417,7 +417,7 @@ const TestePrompt: React.FC = () => {
                 </Button>
                 <Button
                   type="primary"
-                  onClick={handleStartTest}
+                  /*      onClick={handleStartTest} */
                   disabled={loading}
                   loading={loading}
                 >

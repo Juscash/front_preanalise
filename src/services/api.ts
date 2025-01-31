@@ -1,5 +1,5 @@
 import axios, { AxiosInstance, AxiosResponse } from "axios";
-import { Parametros, Motores, motorParametros, MotorComParametros } from "../models";
+import { Parametros, Motores, motorParametros, MotorComParametros, Experimento } from "../models";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -7,7 +7,6 @@ const api: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
 });
 
-type ParametrosCreate = Pick<Parametros, "nome" | "tipo_parametro" | "valor">;
 export interface MotivosProcesso {
   motivo_perda: string;
   id: string;
@@ -58,17 +57,6 @@ export const getIdprocess = async (data: ProcessoFiltro): Promise<Processo[]> =>
       data
     );
     return response.data;
-  } catch (error) {
-    return handleApiError(error);
-  }
-};
-
-export const createParametros = async (parametrosData: ParametrosCreate): Promise<void> => {
-  try {
-    const response: AxiosResponse = await api.post("/parametros/gravar", parametrosData);
-    if (response.status !== 201) {
-      throw new Error("Falha ao cadastrar o prompt");
-    }
   } catch (error) {
     return handleApiError(error);
   }
@@ -168,4 +156,34 @@ export const getMotorParametrosPorMotor = async (id_motor: string): Promise<Moto
   }
 };
 
+export const createExperimento = async (
+  experimento: Omit<Experimento, "id" | "dataHora">
+): Promise<void> => {
+  try {
+    const response: AxiosResponse = await api.post("experimentos/gravar", experimento);
+    if (response.status !== 201) {
+      throw new Error("Falha ao cadastrar o experimento");
+    }
+  } catch (error) {
+    return handleApiError(error);
+  }
+};
+
+export const getExperimentos = async (): Promise<Experimento[]> => {
+  try {
+    const response: AxiosResponse = await api.get("experimentos/lista");
+    return response.data;
+  } catch (error) {
+    return handleApiError(error);
+  }
+};
+
+export const getExperimentosMotor = async (motor_id: string): Promise<Experimento[]> => {
+  try {
+    const response: AxiosResponse = await api.get(`experimentos/lista/${motor_id}`);
+    return response.data;
+  } catch (error) {
+    return handleApiError(error);
+  }
+};
 export default api;
