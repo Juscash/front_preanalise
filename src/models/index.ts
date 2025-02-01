@@ -12,7 +12,7 @@ export interface Motores {
 }
 
 export interface Experimento {
-  id: string;
+  id?: string;
   id_motor: string;
   versao: string;
   descricao: string;

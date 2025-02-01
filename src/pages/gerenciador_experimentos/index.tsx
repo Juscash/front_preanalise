@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Row, Col, Button, message, Form, Spin } from "antd";
 import { Title } from "../../components/typograph";
-import { MotorSelector } from "./MotorSelector";
-import { ExperimentoSelector } from "./ExperimentoSelector";
-import { ExperimentoForm } from "./ExperimentoForm";
+import { MotorSelector } from "../../components/motor/MotorSelector";
+import { ExperimentoSelector } from "../../components/experimento/ExperimentoSelector";
+import { ExperimentoForm } from "../../components/experimento/ExperimentoForm";
 import { ParametrosTabs } from "./ParametrosTabs";
 import { useMotores } from "../../hooks/useMotores";
 import { useExperimentos } from "../../hooks/useExperimentos";

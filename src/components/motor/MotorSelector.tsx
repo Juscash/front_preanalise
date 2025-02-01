@@ -25,7 +25,12 @@ export const MotorSelector: React.FC<MotorSelectorProps> = ({
       />
     </Col>
     <Col span={8}>
-      <Input label="Descrição do motor" name="descricao" value={motorSelected?.descricao || ""} />
+      <Input
+        label="Descrição do motor"
+        readOnly
+        name="descricao"
+        value={motorSelected?.descricao || ""}
+      />
     </Col>
   </Row>
 );

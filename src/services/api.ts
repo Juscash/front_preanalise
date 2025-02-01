@@ -29,9 +29,57 @@ interface ProcessoFiltro {
   data_fim?: string;
 }
 
-interface TestPromptData {
-  lista_processos: Processo[];
+interface TestExperimentoData {
+  processos: Processo[];
+  id_experimento: string;
+}
+
+export interface processosAnalisados {
+  id_pipefy: string;
+  numero_processo: string;
+  tribunal: string;
+  id_agente_analise: string;
+  analise_humana: string;
+  justificativa_ah: string | null;
+  data_ah: string;
+  analise_automatica: string;
+  justificativa_aa: string;
+  acerto_geral: boolean;
+  acerto_bullseye: boolean;
+}
+
+interface metricas {
+  id_teste: string;
   id_prompt: string;
+  id_agente_analise: string;
+  nome_prompt: string;
+  data_aa: string;
+  usuario: string;
+  tamanho_amostra: number;
+  acuracia: number;
+  precisao_negativas: number;
+  nbe: number;
+  status: string;
+}
+
+export interface ExperimentoData {
+  outputs: processosAnalisados[];
+  metricas: metricas;
+}
+export interface TestesData {
+  id_experimento: string;
+  id_teste: string;
+  id_agente_analise: string;
+  nome_prompt: string;
+  data_aa: string;
+  usuario: string;
+  tamanho_amostra: number;
+  acuracia: number;
+  precisao_negativas: number;
+  nbe: number;
+  status: string;
+  descricao: string;
+  versao: string;
 }
 
 const handleApiError = (error: any): never => {
@@ -91,7 +139,7 @@ export const setAuthToken = (token: string): void => {
   api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
 };
 
-export const getListarTestes = async (): Promise<any> => {
+export const getListarTestes = async (): Promise<TestesData[]> => {
   try {
     const response: AxiosResponse = await api.get("prompt_tester/listar_testes");
     return response.data;
@@ -109,9 +157,9 @@ export const getProcessosTeste = async (id: string | number): Promise<any> => {
   }
 };
 
-export const testPrompt = async (data: TestPromptData): Promise<any> => {
+export const testeExperimento = async (data: TestExperimentoData): Promise<ExperimentoData> => {
   try {
-    const response: AxiosResponse = await api.post("prompt_tester/realizar_teste", data);
+    const response: AxiosResponse = await api.post("experimentos/testar", data);
     return response.data;
   } catch (error) {
     return handleApiError(error);
@@ -186,4 +234,5 @@ export const getExperimentosMotor = async (motor_id: string): Promise<Experiment
     return handleApiError(error);
   }
 };
+
 export default api;

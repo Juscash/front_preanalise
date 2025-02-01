@@ -1,6 +1,6 @@
 import React from "react";
 import { Row, Col } from "antd";
-import { Input } from "../../components/form";
+import { Input } from "../form";
 import { Experimento } from "../../models";
 
 interface ExperimentoFormProps {

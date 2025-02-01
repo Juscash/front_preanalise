@@ -1,23 +1,11 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { Row, Col, Tag, Spin, message } from "antd";
 import dayjs from "dayjs";
-import Table from "../components/table";
-import { Title } from "../components/typograph";
-import { getListarTestes, getProcessosTeste } from "../services/api";
+import Table from "../../components/table";
+import { Title } from "../../components/typograph";
+import { getListarTestes, getProcessosTeste, TestesData } from "../../services/api";
 import { ColumnsType } from "antd/es/table";
-import ProcessoDetalhes from "../components/results/ProcessoDetalhes";
-
-interface DataRecord {
-  acuracia: string;
-  data_aa: string;
-  usuario: string;
-  id_teste: string;
-  nbe: string;
-  nome_prompt: string;
-  precisao_negativas: string;
-  status: string;
-  tamanho_amostra: string;
-}
+import ProcessoDetalhes from "../../components/results/ProcessoDetalhes";
 
 const statusColor = {
   "Em andamento": "processing",
@@ -26,12 +14,12 @@ const statusColor = {
 
 const HistoricoTeste: React.FC = () => {
   const [loading, setLoading] = useState(true);
-  const [data, setData] = useState<DataRecord[]>([]);
-  const [selectedTest, setSelectedTest] = useState<DataRecord | null>(null);
+  const [data, setData] = useState<TestesData[]>([]);
+  const [selectedTest, setSelectedTest] = useState<TestesData | null>(null);
   const [processos, setProcessos] = useState<any[]>([]);
   const [processosLoading, setProcessosLoading] = useState(false);
 
-  const createFilters = (data: DataRecord[], key: keyof DataRecord) => {
+  const createFilters = (data: TestesData[], key: keyof TestesData) => {
     const uniqueValues = Array.from(new Set(data.map((item) => item[key])));
     return uniqueValues.map((value) => ({ text: value, value: value }));
   };
@@ -52,7 +40,7 @@ const HistoricoTeste: React.FC = () => {
     fetchTestes();
   }, [fetchTestes]);
 
-  const handleRowClick = async (record: DataRecord) => {
+  const handleRowClick = async (record: TestesData) => {
     setSelectedTest(record);
     setProcessosLoading(true);
     try {
@@ -81,16 +69,27 @@ const HistoricoTeste: React.FC = () => {
     setProcessos([]);
   };
 
-  const columns: ColumnsType<DataRecord> = useMemo(
+  const columns: ColumnsType<TestesData> = useMemo(
     () => [
       {
+        title: "ID do teste",
+        dataIndex: "id_teste",
+        key: "id_teste",
+        sorter: (a, b) => a.id_teste.localeCompare(b.id_teste),
+        filters: createFilters(data, "id_teste"),
+        onFilter: (value, record) => record.id_teste === value,
+        render: (id: number) => <div className="text-center">{id}</div>,
+      },
+      {
         title: "Experimento",
-        dataIndex: "nome_prompt",
+        dataIndex: "descricao",
         key: "nome_prompt",
         sorter: (a, b) => a.nome_prompt.localeCompare(b.nome_prompt),
         filters: createFilters(data, "nome_prompt"),
         onFilter: (value, record) => record.nome_prompt === value,
-        render: (nome: string) => <div className="text-center">{nome}</div>,
+        render: (nome: string, ref) => (
+          <div className="text-center">{`${ref.versao} - ${ref.descricao}`}</div>
+        ),
       },
       {
         title: "Dia do teste",
@@ -170,7 +169,7 @@ const HistoricoTeste: React.FC = () => {
         title: "Ação",
         dataIndex: "action",
         key: "action",
-        render: (_: any, record: DataRecord) => (
+        render: (_: any, record: TestesData) => (
           <a onClick={() => handleRowClick(record)}>Ver processos</a>
         ),
       },
