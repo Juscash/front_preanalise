@@ -1,5 +1,5 @@
 import axios, { AxiosInstance, AxiosResponse } from "axios";
-import { Parametros, Motores, motorParametros, MotorComParametros, Experimento } from "../models";
+import { Motores, Experimento } from "../models";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -31,7 +31,7 @@ interface ProcessoFiltro {
 
 interface TestExperimentoData {
   processos: Processo[];
-  id_experimento: string;
+  id_experimento: number;
 }
 
 export interface processosAnalisados {
@@ -67,8 +67,8 @@ export interface ExperimentoData {
   metricas: metricas;
 }
 export interface TestesData {
-  id_experimento: string;
-  id_teste: string;
+  id_experimento: number;
+  id_teste: number;
   id_agente_analise: string;
   nome_prompt: string;
   data_aa: string;
@@ -85,17 +85,6 @@ export interface TestesData {
 const handleApiError = (error: any): never => {
   console.error("API Error:", error);
   throw error;
-};
-
-export const getParametros = async (tipo_parametro: string): Promise<Parametros[]> => {
-  try {
-    const response: AxiosResponse<Parametros[]> = await api.get(
-      `parametros/lista/${tipo_parametro}`
-    );
-    return response.data;
-  } catch (error) {
-    return handleApiError(error);
-  }
 };
 
 export const getIdprocess = async (data: ProcessoFiltro): Promise<Processo[]> => {
@@ -166,39 +155,10 @@ export const testeExperimento = async (data: TestExperimentoData): Promise<Exper
   }
 };
 
-export const getTipoParametros = async (): Promise<{ tipo_parametro: string }[]> => {
-  try {
-    const response: AxiosResponse = await api.get("parametros/tipos_parametros");
-    return response.data;
-  } catch (error) {
-    return handleApiError(error);
-  }
-};
-
 export const getMotores = async (): Promise<Motores[]> => {
   try {
     const response: AxiosResponse = await api.get("motor/lista");
     return response.data;
-  } catch (error) {
-    return handleApiError(error);
-  }
-};
-
-export const getMotorParametros = async (tipo_parametro: string): Promise<motorParametros[]> => {
-  try {
-    const response: AxiosResponse = await api.get(
-      `motor/listar_motor_parametros/${tipo_parametro}`
-    );
-    return response.data;
-  } catch (error) {
-    return handleApiError(error);
-  }
-};
-
-export const getMotorParametrosPorMotor = async (id_motor: string): Promise<MotorComParametros> => {
-  try {
-    const response: AxiosResponse = await api.get(`motor/listar_motor_com_parametros/${id_motor}`);
-    return response.data[0];
   } catch (error) {
     return handleApiError(error);
   }
@@ -217,16 +177,7 @@ export const createExperimento = async (
   }
 };
 
-export const getExperimentos = async (): Promise<Experimento[]> => {
-  try {
-    const response: AxiosResponse = await api.get("experimentos/lista");
-    return response.data;
-  } catch (error) {
-    return handleApiError(error);
-  }
-};
-
-export const getExperimentosMotor = async (motor_id: string): Promise<Experimento[]> => {
+export const getExperimentosMotor = async (motor_id: number): Promise<Experimento[]> => {
   try {
     const response: AxiosResponse = await api.get(`experimentos/lista/${motor_id}`);
     return response.data;

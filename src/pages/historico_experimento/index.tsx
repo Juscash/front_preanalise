@@ -12,7 +12,7 @@ const statusColor = {
   Finalizado: "success",
 } as const;
 
-const HistoricoTeste: React.FC = () => {
+const HistoricoExperimento: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<TestesData[]>([]);
   const [selectedTest, setSelectedTest] = useState<TestesData | null>(null);
@@ -75,7 +75,7 @@ const HistoricoTeste: React.FC = () => {
         title: "ID do teste",
         dataIndex: "id_teste",
         key: "id_teste",
-        sorter: (a, b) => a.id_teste.localeCompare(b.id_teste),
+        sorter: (a, b) => a.id_teste - b.id_teste,
         filters: createFilters(data, "id_teste"),
         onFilter: (value, record) => record.id_teste === value,
         render: (id: number) => <div className="text-center">{id}</div>,
@@ -83,11 +83,11 @@ const HistoricoTeste: React.FC = () => {
       {
         title: "Experimento",
         dataIndex: "descricao",
-        key: "nome_prompt",
-        sorter: (a, b) => a.nome_prompt.localeCompare(b.nome_prompt),
-        filters: createFilters(data, "nome_prompt"),
-        onFilter: (value, record) => record.nome_prompt === value,
-        render: (nome: string, ref) => (
+        key: "versao",
+        sorter: (a, b) => a.versao.localeCompare(b.versao),
+        filters: createFilters(data, "versao"),
+        onFilter: (value, record) => record.versao === value,
+        render: (_nome: string, ref) => (
           <div className="text-center">{`${ref.versao} - ${ref.descricao}`}</div>
         ),
       },
@@ -179,7 +179,7 @@ const HistoricoTeste: React.FC = () => {
 
   return (
     <>
-      <Title level={1}>Histórico de teste de prompt</Title>
+      <Title level={1}>Histórico de experimento</Title>
       <Spin spinning={loading || processosLoading}>
         <div>
           {!selectedTest ? (
@@ -203,4 +203,4 @@ const HistoricoTeste: React.FC = () => {
   );
 };
 
-export default HistoricoTeste;
+export default HistoricoExperimento;

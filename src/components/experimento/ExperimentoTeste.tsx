@@ -14,6 +14,7 @@ const colors = {
 };
 
 const ExperimentoTeste: React.FC<ExperimentoData> = (data) => {
+  console.log(data, "data");
   const createFilters = (key: keyof processosAnalisados) => {
     const uniqueValues = Array.from(new Set(data.outputs.map((item) => item[key])));
     return uniqueValues.map((value) => ({ text: value as React.ReactNode, value: value ?? "" }));

@@ -5,7 +5,7 @@ import { Motores } from "../../models";
 
 interface MotorSelectorProps {
   motores: Motores[];
-  onMotorChange: (motorId: string) => void;
+  onMotorChange: (motorId: number) => void;
   motorSelected: Motores | null;
 }
 
@@ -20,7 +20,7 @@ export const MotorSelector: React.FC<MotorSelectorProps> = ({
         required
         label="Motor"
         name="motor"
-        selects={motores.map((item) => ({ value: item.id, name: item.nome }))}
+        selects={motores.map((item) => ({ value: item.id.toString(), name: item.nome }))}
         onChange={onMotorChange}
       />
     </Col>

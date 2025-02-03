@@ -4,7 +4,7 @@ export interface Parametros {
 }
 
 export interface Motores {
-  id: string;
+  id: number;
   nome: string;
   descricao: string;
   url_endpoint: string;
@@ -12,20 +12,20 @@ export interface Motores {
 }
 
 export interface Experimento {
-  id?: string;
-  id_motor: string;
-  versao: string;
+  id?: number;
+  id_motor: number;
+  versao: number;
   descricao: string;
-  dataHora: string;
+  dataHora: Date;
   parametros: Parametros[];
 }
 export interface motorParametros {
-  id: string;
+  id: number;
   nome: string;
 }
 
 export interface MotorComParametros {
-  id: string;
+  id: number;
   nome: string;
   descricao: string;
   url_endpoint: string;

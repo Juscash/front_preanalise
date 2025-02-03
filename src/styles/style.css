@@ -135,6 +135,7 @@ textarea::placeholder {
 }
 
 .tag-input-tag {
+    height: 25px;
     margin: 4px;
     color: var(--primary-color);
 }

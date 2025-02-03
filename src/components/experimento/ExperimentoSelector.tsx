@@ -5,7 +5,7 @@ import { Experimento } from "../../models";
 
 interface ExperimentoSelectorProps {
   experimentosMotor: Experimento[];
-  onExperimentoChange: (experimentoId: string) => void;
+  onExperimentoChange: (experimentoId: number) => void;
   gravar?: boolean;
 }
 
@@ -20,7 +20,7 @@ export const ExperimentoSelector: React.FC<ExperimentoSelectorProps> = ({
         label={gravar ? "Experimentos gravados" : "Selecione um experimento"}
         name="experimentos"
         selects={experimentosMotor.map((ref) => ({
-          value: ref.id || "",
+          value: ref.id?.toString() || "",
           name: `${ref.versao} - ${ref.descricao}`,
         }))}
         onChange={onExperimentoChange}

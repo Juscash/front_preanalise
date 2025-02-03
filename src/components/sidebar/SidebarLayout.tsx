@@ -34,9 +34,9 @@ const menuItems = [
     label: "Teste de Experimento",
   },
   {
-    key: "/historico-teste",
+    key: "/historico-experimento",
     icon: <HistoryOutlined />,
-    label: "Histórico de Teste",
+    label: "Histórico de Experimentos",
   },
   // { key: "/nova-reanalise", icon: <SyncOutlined />, label: "Nova reanalise" },
 ];

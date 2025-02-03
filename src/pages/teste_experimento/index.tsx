@@ -83,8 +83,8 @@ const testarExperimentos: React.FC = () => {
     }
   }, []);
   const handleMotorChange = useCallback(
-    (motorId: string) => {
-      const motor = motores.find((m) => m.id === motorId);
+    (motorId: number) => {
+      const motor = motores.find((m) => m.id == motorId);
       if (motor) {
         setMotorSelected(motor);
         fetchExperimentosMotor(motor.id);
@@ -98,8 +98,8 @@ const testarExperimentos: React.FC = () => {
     [motores, fetchExperimentosMotor, setExperimentos]
   );
   const handleExperimentoChange = useCallback(
-    (experimentoId: string) => {
-      const experimento = experimentosMotor.find((e) => e.id === experimentoId);
+    (experimentoId: number) => {
+      const experimento = experimentosMotor.find((e) => e.id == experimentoId);
       if (experimento) {
         setExperimentos({
           id: experimento.id,
@@ -142,6 +142,10 @@ const testarExperimentos: React.FC = () => {
   };
 
   const fetchProcessosMotivo = async () => {
+    if (!filterProcess.motivo) {
+      message.error("Selecione um motivo para buscar os processos");
+      return;
+    }
     setLoading(true);
     try {
       const data = await getProcessosMotivo(filterProcess);
@@ -221,7 +225,7 @@ const testarExperimentos: React.FC = () => {
     try {
       const data = await testeExperimento({ processos, id_experimento: experimentos.id });
       setIsResultVisible(true);
-      console.log(data, "resultado");
+
       setResultData(data);
     } catch (error) {
       console.error("Erro ao buscar processos por motivo:", error);

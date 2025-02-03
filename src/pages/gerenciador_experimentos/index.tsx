@@ -31,16 +31,17 @@ const GerenciadorExperimentos: React.FC = () => {
     form.resetFields();
     setMotorSelected(null);
     setExperimentos({
-      id_motor: "",
-      versao: "",
+      id_motor: 0,
+      versao: 0,
       descricao: "",
       parametros: [],
     });
   }, [form, setExperimentos]);
 
   const handleMotorChange = useCallback(
-    (motorId: string) => {
-      const motor = motores.find((m) => m.id === motorId);
+    (motorId: number) => {
+      const motor = motores.find((m) => m.id == motorId);
+
       if (motor) {
         setMotorSelected(motor);
         fetchExperimentosMotor(motor.id);
@@ -55,8 +56,8 @@ const GerenciadorExperimentos: React.FC = () => {
   );
 
   const handleExperimentoChange = useCallback(
-    (experimentoId: string) => {
-      const experimento = experimentosMotor.find((e) => e.id === experimentoId);
+    (experimentoId: number) => {
+      const experimento = experimentosMotor.find((e) => e.id == experimentoId);
       if (experimento) {
         setExperimentos({
           id_motor: experimento.id_motor,

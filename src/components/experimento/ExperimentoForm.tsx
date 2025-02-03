@@ -1,6 +1,6 @@
 import React from "react";
 import { Row, Col } from "antd";
-import { Input } from "../form";
+import { Number, Input } from "../form";
 import { Experimento } from "../../models";
 
 interface ExperimentoFormProps {
@@ -16,7 +16,13 @@ export const ExperimentoForm: React.FC<ExperimentoFormProps> = ({
 }) => (
   <Row gutter={16}>
     <Col span={8}>
-      <Input label="Versão" name="versao" disabled={loading} value={experimentos.versao} />
+      <Number
+        type="number"
+        label="Versão"
+        name="versao"
+        disabled={loading}
+        value={experimentos.versao}
+      />
     </Col>
     <Col span={8}>
       <Input
