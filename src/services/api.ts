@@ -78,7 +78,7 @@ export interface TestesData {
 }
 
 const handleApiError = (error: any): never => {
-  console.error("API Error:", error);
+  console.error("API Errorr:", error);
   throw error;
 };
 
