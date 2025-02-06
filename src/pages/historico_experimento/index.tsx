@@ -84,9 +84,9 @@ const HistoricoExperimento: React.FC = () => {
         title: "Experimento",
         dataIndex: "descricao",
         key: "versao",
-        sorter: (a, b) => a.versao.localeCompare(b.versao),
-        filters: createFilters(data, "versao"),
-        onFilter: (value, record) => record.versao === value,
+        sorter: (a, b) => a.descricao.localeCompare(b.descricao),
+        filters: createFilters(data, "descricao"),
+        onFilter: (value, record) => record.descricao == value,
         render: (_nome: string, ref) => (
           <div className="text-center">{`${ref.versao} - ${ref.descricao}`}</div>
         ),
@@ -128,7 +128,7 @@ const HistoricoExperimento: React.FC = () => {
         key: "precisao_negativas",
         sorter: (a, b) => Number(a.precisao_negativas) - Number(b.precisao_negativas),
         filters: createFilters(data, "precisao_negativas"),
-        onFilter: (value, record) => record.precisao_negativas === value,
+        onFilter: (value, record) => record.precisao_negativas == value,
         render: (precisao: string) => (
           <div className="text-center">{(Number(precisao) * 100).toFixed(2)}%</div>
         ),

@@ -17,11 +17,6 @@ export interface Processo {
   id_pipefy: string;
 }
 
-export interface ProcessoId {
-  numero_processo: string;
-  id: string;
-}
-
 interface ProcessoFiltro {
   lista_processos: string[];
   motivo?: string;
@@ -122,10 +117,6 @@ export const getProcessosMotivo = async (
   } catch (error) {
     return handleApiError(error);
   }
-};
-
-export const setAuthToken = (token: string): void => {
-  api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
 };
 
 export const getListarTestes = async (): Promise<TestesData[]> => {
