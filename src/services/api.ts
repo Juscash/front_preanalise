@@ -1,17 +1,11 @@
 import axios, { AxiosInstance, AxiosResponse } from "axios";
-import { Prompt } from "../models";
+import { Motores, Experimento } from "../models";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const api: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
 });
-
-export interface PromptCreate {
-  grupo: string;
-  descricao: string;
-  prompt: string;
-}
 
 export interface MotivosProcesso {
   motivo_perda: string;
@@ -23,11 +17,6 @@ export interface Processo {
   id_pipefy: string;
 }
 
-export interface ProcessoId {
-  numero_processo: string;
-  id: string;
-}
-
 interface ProcessoFiltro {
   lista_processos: string[];
   motivo?: string;
@@ -35,23 +24,62 @@ interface ProcessoFiltro {
   data_fim?: string;
 }
 
-interface TestPromptData {
-  lista_processos: Processo[];
+interface TestExperimentoData {
+  processos: Processo[];
+  id_experimento: number;
+}
+
+export interface processosAnalisados {
+  id_pipefy: string;
+  numero_processo: string;
+  tribunal: string;
+  id_agente_analise: string;
+  analise_humana: string;
+  justificativa_ah: string | null;
+  data_ah: string;
+  analise_automatica: string;
+  justificativa_aa: string;
+  acerto_geral: boolean;
+  acerto_bullseye: boolean;
+}
+
+interface metricas {
+  id_teste: string;
   id_prompt: string;
+  id_agente_analise: string;
+  nome_prompt: string;
+  data_aa: string;
+  usuario: string;
+  tamanho_amostra: number;
+  acuracia: number;
+  precisao_negativas: number;
+  nbe: number;
+  status: string;
+}
+
+export interface ExperimentoData {
+  outputs: processosAnalisados[];
+  metricas: metricas;
+}
+export interface TestesData {
+  id_experimento: number;
+  id_teste: number;
+  id_agente_analise: string;
+  nome_prompt: string;
+  data_aa: string;
+  usuario: string;
+  tamanho_amostra: number;
+  acuracia: number;
+  precisao_negativas: number;
+  nbe: number;
+  status: string;
+  descricao: string;
+  versao: string;
 }
 
 const handleApiError = (error: any): never => {
   console.error("API Error:", error);
   throw error;
-};
-
-export const getPrompts = async (): Promise<Prompt[]> => {
-  try {
-    const response: AxiosResponse<Prompt[]> = await api.get("/prompts/listar");
-    return response.data;
-  } catch (error) {
-    return handleApiError(error);
-  }
 };
 
 export const getIdprocess = async (data: ProcessoFiltro): Promise<Processo[]> => {
@@ -61,17 +89,6 @@ export const getIdprocess = async (data: ProcessoFiltro): Promise<Processo[]> =>
       data
     );
     return response.data;
-  } catch (error) {
-    return handleApiError(error);
-  }
-};
-
-export const createPrompt = async (promptData: PromptCreate): Promise<void> => {
-  try {
-    const response: AxiosResponse = await api.post("/prompts/gravar", promptData);
-    if (response.status !== 201) {
-      throw new Error("Falha ao cadastrar o prompt");
-    }
   } catch (error) {
     return handleApiError(error);
   }
@@ -102,11 +119,7 @@ export const getProcessosMotivo = async (
   }
 };
 
-export const setAuthToken = (token: string): void => {
-  api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-};
-
-export const getListarTestes = async (): Promise<any> => {
+export const getListarTestes = async (): Promise<TestesData[]> => {
   try {
     const response: AxiosResponse = await api.get("prompt_tester/listar_testes");
     return response.data;
@@ -124,9 +137,40 @@ export const getProcessosTeste = async (id: string | number): Promise<any> => {
   }
 };
 
-export const testPrompt = async (data: TestPromptData): Promise<any> => {
+export const testeExperimento = async (data: TestExperimentoData): Promise<ExperimentoData> => {
   try {
-    const response: AxiosResponse = await api.post("prompt_tester/realizar_teste", data);
+    const response: AxiosResponse = await api.post("experimentos/testar", data);
+    return response.data;
+  } catch (error) {
+    return handleApiError(error);
+  }
+};
+
+export const getMotores = async (): Promise<Motores[]> => {
+  try {
+    const response: AxiosResponse = await api.get("motor/lista");
+    return response.data;
+  } catch (error) {
+    return handleApiError(error);
+  }
+};
+
+export const createExperimento = async (
+  experimento: Omit<Experimento, "id" | "dataHora">
+): Promise<void> => {
+  try {
+    const response: AxiosResponse = await api.post("experimentos/gravar", experimento);
+    if (response.status !== 201) {
+      throw new Error("Falha ao cadastrar o experimento");
+    }
+  } catch (error) {
+    return handleApiError(error);
+  }
+};
+
+export const getExperimentosMotor = async (motor_id: number): Promise<Experimento[]> => {
+  try {
+    const response: AxiosResponse = await api.get(`experimentos/lista/${motor_id}`);
     return response.data;
   } catch (error) {
     return handleApiError(error);

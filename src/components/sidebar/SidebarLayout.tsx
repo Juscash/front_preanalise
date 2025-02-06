@@ -24,19 +24,19 @@ const TEXT_COLOR = "white";
 
 const menuItems = [
   {
-    key: "/gerenciador-prompt",
+    key: "/gerenciador-experimentos",
     icon: <FileTextOutlined />,
-    label: "Gerenciador Prompt",
+    label: "Gerenciador de Experimentos",
   },
   {
-    key: "/teste-prompt",
+    key: "/teste-experimento",
     icon: <ExperimentOutlined />,
-    label: "Teste de Prompt",
+    label: "Teste de Experimento",
   },
   {
-    key: "/historico-teste",
+    key: "/historico-experimento",
     icon: <HistoryOutlined />,
-    label: "Histórico de Teste",
+    label: "Histórico de Experimentos",
   },
   // { key: "/nova-reanalise", icon: <SyncOutlined />, label: "Nova reanalise" },
 ];
