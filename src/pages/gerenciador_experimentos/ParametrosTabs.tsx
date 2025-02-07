@@ -1,5 +1,5 @@
 import React, { useMemo, useCallback } from "react";
-import { Row, Col, Tabs } from "antd";
+import { Row, Col, Tabs, Form } from "antd";
 import { TextArea } from "../../components/form";
 import type { TabsProps } from "antd";
 
@@ -25,15 +25,21 @@ export const ParametrosTabs: React.FC<ParametrosTabsProps> = React.memo(
           label: p.nome,
           key: p.nome,
           children: (
-            <TextArea
-              readOnly={!gravar}
-              label={p.nome}
+            <Form.Item
               name={p.nome}
-              rows={6}
-              value={p.valor}
-              onChange={handleChange(p.nome)}
-              required={gravar}
-            />
+              rules={[{ required: gravar, message: `Por favor, preencha o parâmetro ${p.nome}` }]}
+              getValueProps={(val) => ({ value: p.valor ?? val })}
+            >
+              <TextArea
+                readOnly={!gravar}
+                label={p.nome}
+                name={p.nome}
+                rows={6}
+                value={p.valor}
+                onChange={handleChange(p.nome)}
+                required={gravar}
+              />
+            </Form.Item>
           ),
         })),
       [parametros, handleChange]

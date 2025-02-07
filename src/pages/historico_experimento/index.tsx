@@ -81,6 +81,22 @@ const HistoricoExperimento: React.FC = () => {
         render: (id: number) => <div className="text-center">{id}</div>,
       },
       {
+        title: "Descrição teste",
+        dataIndex: "descricao_teste",
+        key: "descricao_teste",
+        sorter: (a, b) => {
+          if (a.descricao_teste === null && b.descricao_teste === null) return 0;
+          if (a.descricao_teste === null) return 1;
+          if (b.descricao_teste === null) return -1;
+          return a.descricao_teste.localeCompare(b.descricao_teste);
+        },
+        filters: createFilters(data, "descricao_teste"),
+        onFilter: (value, record) => record.descricao_teste === value,
+        render: (_nome: string, ref) => (
+          <div className="text-center">{`${ref.descricao_teste}`}</div>
+        ),
+      },
+      {
         title: "Experimento",
         dataIndex: "descricao",
         key: "versao",
@@ -142,6 +158,17 @@ const HistoricoExperimento: React.FC = () => {
         onFilter: (value, record) => record.nbe === value,
         render: (nbe: string) => (
           <div className="text-center">{(Number(nbe) * 100).toFixed(2)}%</div>
+        ),
+      },
+      {
+        title: "Cobertura",
+        dataIndex: "cobertura",
+        key: "cobertura",
+        sorter: (a, b) => Number(a.cobertura) - Number(b.cobertura),
+        filters: createFilters(data, "cobertura"),
+        onFilter: (value, record) => record.cobertura === value,
+        render: (cobertura: string) => (
+          <div className="text-center">{(Number(cobertura) * 100).toFixed(2)}%</div>
         ),
       },
       {

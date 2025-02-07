@@ -65,6 +65,20 @@ const GerenciadorExperimentos: React.FC = () => {
           descricao: experimento.descricao,
           parametros: experimento.parametros,
         });
+
+        let parms = {};
+        let setfielparametros = experimento.parametros.map((p) => ({
+          [p.nome]: p.valor,
+        }));
+        setfielparametros.forEach((p) => {
+          parms = { ...parms, ...p };
+        });
+
+        form.setFieldsValue({
+          versao: experimentos.versao,
+          descricao: experimento.descricao,
+          ...parms,
+        });
       }
     },
     [experimentosMotor, experimentos.versao, setExperimentos]

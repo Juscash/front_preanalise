@@ -1,5 +1,5 @@
-import React, { useMemo } from "react";
-import { Col, Row, Button, Typography, Tooltip } from "antd";
+import React, { useMemo, useState } from "react";
+import { Col, Row, Button, Typography, Tooltip, Modal } from "antd";
 import * as XLSX from "xlsx";
 import Table from "../table";
 import { Title } from "../typograph";
@@ -12,14 +12,14 @@ const colors = {
   Aprovado: "success",
   Negado: "danger",
 };
-
+const { Text } = Typography;
 const ExperimentoTeste: React.FC<ExperimentoData> = (data) => {
-  console.log(data, "data");
   const createFilters = (key: keyof processosAnalisados) => {
     const uniqueValues = Array.from(new Set(data.outputs.map((item) => item[key])));
     return uniqueValues.map((value) => ({ text: value as React.ReactNode, value: value ?? "" }));
   };
-
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [modalContent, setModalContent] = useState<any>(null);
   const tribunalFilters = useMemo(() => createFilters("tribunal"), [data]);
   const analiseHumanaFilters = useMemo(() => createFilters("analise_humana"), [data]);
   const analiseAutomacaoFilters = useMemo(() => createFilters("analise_automatica"), [data]);
@@ -115,6 +115,12 @@ const ExperimentoTeste: React.FC<ExperimentoData> = (data) => {
         <Typography.Text>{new Date(text).toLocaleDateString("pt-BR")}</Typography.Text>
       ),
     },
+    {
+      title: "Ação",
+      dataIndex: "action",
+      key: "action",
+      render: (_: any, record: any) => <a onClick={() => showDebugModal(record)}>Ver debug</a>,
+    },
   ];
   const exportToExcel = () => {
     const ws = XLSX.utils.json_to_sheet(data.outputs);
@@ -127,8 +133,34 @@ const ExperimentoTeste: React.FC<ExperimentoData> = (data) => {
     { label: "Acurácia", value: data.metricas.acuracia },
     { label: "Precisão de negativas", value: data.metricas.precisao_negativas },
     { label: "NBE", value: data.metricas.nbe },
-    { label: "Cobertura", value: 0 },
+    { label: "Cobertura", value: data.metricas.cobertura },
   ];
+  const showDebugModal = (record: any) => {
+    setModalContent(record.debugs);
+    setIsModalVisible(true);
+  };
+
+  const handleModalClose = () => {
+    setIsModalVisible(false);
+  };
+
+  const renderDebugContent = (content: any) => {
+    if (Array.isArray(content)) {
+      return content.map((item, index) => (
+        <div key={index} style={{ marginBottom: "20px" }}>
+          <Text strong>{`Iteração ${index}:`}</Text>
+          <pre style={{ whiteSpace: "pre-wrap", wordWrap: "break-word" }}>
+            {JSON.stringify(item, null, 2)}
+          </pre>
+        </div>
+      ));
+    }
+    return (
+      <pre style={{ whiteSpace: "pre-wrap", wordWrap: "break-word" }}>
+        {JSON.stringify(content, null, 2)}
+      </pre>
+    );
+  };
 
   return (
     <div>
@@ -152,6 +184,15 @@ const ExperimentoTeste: React.FC<ExperimentoData> = (data) => {
           </Button>
         </Col>
       </Row>
+      <Modal
+        title="Debug Information"
+        visible={isModalVisible}
+        onCancel={handleModalClose}
+        footer={null}
+        width={1000}
+      >
+        {renderDebugContent(modalContent)}
+      </Modal>
     </div>
   );
 };

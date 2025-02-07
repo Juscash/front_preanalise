@@ -63,7 +63,11 @@ const TestPrompt: React.FC<Props> = ({ acuracia, precisao, nbe, cobertura, data 
       title: "Tribunal",
       dataIndex: "tribunal",
       key: "tribunal",
-      sorter: (a: DataType, b: DataType) => a.tribunal.localeCompare(b.tribunal),
+      sorter: (a: DataType, b: DataType) => {
+        const tribunalA = a?.tribunal || "";
+        const tribunalB = b?.tribunal || "";
+        return tribunalA.localeCompare(tribunalB);
+      },
       filters: tribunalFilters,
       onFilter: (value, record) => record.tribunal === value,
     },

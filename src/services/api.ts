@@ -27,6 +27,7 @@ interface ProcessoFiltro {
 interface TestExperimentoData {
   processos: Processo[];
   id_experimento: number;
+  descricao: string;
 }
 
 export interface processosAnalisados {
@@ -55,6 +56,7 @@ interface metricas {
   precisao_negativas: number;
   nbe: number;
   status: string;
+  cobertura: number;
 }
 
 export interface ExperimentoData {
@@ -75,6 +77,8 @@ export interface TestesData {
   status: string;
   descricao: string;
   versao: string;
+  descricao_teste: string;
+  cobertura: number;
 }
 
 const handleApiError = (error: any): never => {

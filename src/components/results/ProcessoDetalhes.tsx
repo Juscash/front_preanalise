@@ -1,11 +1,12 @@
-import React, { useMemo } from "react";
-import { Col, Row, Button, Typography, Tooltip } from "antd";
+import React, { useMemo, useState } from "react";
+import { Col, Row, Button, Typography, Tooltip, Modal } from "antd";
 import Table from "../table";
 import { GaugeChart } from "../graphics";
 import { ColumnsType } from "antd/es/table";
 import { WarningOutlined } from "@ant-design/icons";
 
 import * as XLSX from "xlsx";
+const { Text } = Typography;
 
 interface DataType {
   id_teste: React.Key;
@@ -52,13 +53,28 @@ const ProcessoDetalhes: React.FC<ProcessoDetalhesProps> = ({
   const analiseAutomacaoFilters = useMemo(() => createFilters("analise_automatica"), [processos]);
   const justificativaAhFilters = useMemo(() => createFilters("justificativa_ah"), [processos]);
   const justificativaAaFilters = useMemo(() => createFilters("justificativa_aa"), [processos]);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [modalContent, setModalContent] = useState<any>(null);
+
+  const showDebugModal = (record: any) => {
+    setModalContent(record.debugs);
+    setIsModalVisible(true);
+  };
+
+  const handleModalClose = () => {
+    setIsModalVisible(false);
+  };
 
   const columns: ColumnsType<DataType> = [
     {
       title: "Processo",
       dataIndex: "numero_processo",
       key: "numero_processo",
-      sorter: (a: DataType, b: DataType) => a.numero_processo.localeCompare(b.numero_processo),
+      sorter: (a: DataType, b: DataType) => {
+        const processoA = a?.numero_processo || "";
+        const processoB = b?.numero_processo || "";
+        return processoA.localeCompare(processoB);
+      },
       render: (text: string) => <Typography.Text>{text}</Typography.Text>,
     },
     {
@@ -72,7 +88,12 @@ const ProcessoDetalhes: React.FC<ProcessoDetalhesProps> = ({
       title: "Tribunal",
       dataIndex: "tribunal",
       key: "tribunal",
-      sorter: (a: DataType, b: DataType) => a.tribunal.localeCompare(b.tribunal),
+      sorter: (a: DataType, b: DataType) => {
+        if (a.tribunal === null && b.tribunal === null) return 0;
+        if (a.tribunal === null) return 1;
+        if (b.tribunal === null) return -1;
+        return a.tribunal.localeCompare(b.tribunal);
+      },
       filters: tribunalFilters,
       onFilter: (value, record) => record.tribunal === value,
     },
@@ -139,7 +160,31 @@ const ProcessoDetalhes: React.FC<ProcessoDetalhesProps> = ({
         <Typography.Text>{new Date(text).toLocaleDateString("pt-BR")}</Typography.Text>
       ),
     },
+    {
+      title: "Ação",
+      dataIndex: "action",
+      key: "action",
+      render: (_: any, record: any) => <a onClick={() => showDebugModal(record)}>Ver debug</a>,
+    },
   ];
+
+  const renderDebugContent = (content: any) => {
+    if (Array.isArray(content)) {
+      return content.map((item, index) => (
+        <div key={index} style={{ marginBottom: "20px" }}>
+          <Text strong>{`Iteração ${index}:`}</Text>
+          <pre style={{ whiteSpace: "pre-wrap", wordWrap: "break-word" }}>
+            {JSON.stringify(item, null, 2)}
+          </pre>
+        </div>
+      ));
+    }
+    return (
+      <pre style={{ whiteSpace: "pre-wrap", wordWrap: "break-word" }}>
+        {JSON.stringify(content, null, 2)}
+      </pre>
+    );
+  };
 
   return (
     <>
@@ -160,7 +205,7 @@ const ProcessoDetalhes: React.FC<ProcessoDetalhesProps> = ({
           <GaugeChart value={Number(selectedTest.nbe) * 100} label="NBE" />
         </Col>
         <Col>
-          <GaugeChart value={0} label="Cobertura" />
+          <GaugeChart value={Number(selectedTest.cobertura) * 100} label="Cobertura" />
         </Col>
       </Row>
       <Table columns={columns} data={processos} bordered rowKey="id_pipefy" />
@@ -171,6 +216,15 @@ const ProcessoDetalhes: React.FC<ProcessoDetalhesProps> = ({
           </Button>
         </Col>
       </Row>
+      <Modal
+        title="Debug Information"
+        visible={isModalVisible}
+        onCancel={handleModalClose}
+        footer={null}
+        width={1000}
+      >
+        {renderDebugContent(modalContent)}
+      </Modal>
     </>
   );
 };

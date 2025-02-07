@@ -39,6 +39,7 @@ const DEFAULT_END_DATE = "2024-09-30";
 const testarExperimentos: React.FC = () => {
   const [form] = Form.useForm();
   const [listProcessos, setListProcessos] = useState<string>("");
+  const [descricao, setDescricao] = useState<string>("");
   const [isResultVisible, setIsResultVisible] = useState<boolean>(false);
   const [processos, setProcessos] = useState<ProcessoID[]>([]);
   const [resultData, setResultData] = useState<ExperimentoData>();
@@ -112,6 +113,7 @@ const testarExperimentos: React.FC = () => {
     },
     [experimentosMotor, experimentos.versao, setExperimentos]
   );
+
   const handleParametroChange = useCallback(
     (nome: string, valor: string) => {
       setExperimentos((prev) => ({
@@ -121,6 +123,10 @@ const testarExperimentos: React.FC = () => {
     },
     [setExperimentos]
   );
+
+  const handleDescricaoChange = useCallback((descricao: string) => {
+    setDescricao(descricao);
+  }, []);
 
   const handleDateChange = (
     dates: [dayjs.Dayjs | null, dayjs.Dayjs | null],
@@ -223,7 +229,11 @@ const testarExperimentos: React.FC = () => {
       return;
     }
     try {
-      const data = await testeExperimento({ processos, id_experimento: experimentos.id });
+      const data = await testeExperimento({
+        processos,
+        id_experimento: experimentos.id,
+        descricao: descricao,
+      });
       setIsResultVisible(true);
 
       setResultData(data);
@@ -247,7 +257,9 @@ const testarExperimentos: React.FC = () => {
           <ExperimentoSelector
             experimentosMotor={experimentosMotor}
             onExperimentoChange={handleExperimentoChange}
+            onDescricaoChange={handleDescricaoChange}
             gravar={false}
+            descricao={descricao}
           />
           <ParametrosTabs
             view={experimentos.id ? true : false}
