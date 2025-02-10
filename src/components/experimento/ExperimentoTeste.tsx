@@ -144,7 +144,7 @@ const ExperimentoTeste: React.FC<ExperimentoData> = (data) => {
     setIsModalVisible(false);
   };
 
-  const renderDebugContent = (content: any) => {
+  const renderDebugContent = (content: string) => {
     if (Array.isArray(content)) {
       return content.map((item, index) => (
         <div key={index} style={{ marginBottom: "20px" }}>
