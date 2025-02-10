@@ -5,6 +5,7 @@ import { GaugeChart } from "../graphics";
 import { ColumnsType } from "antd/es/table";
 import { WarningOutlined, SearchOutlined } from "@ant-design/icons";
 import type { InputRef, TableColumnType } from "antd";
+import ReactMarkdown from "react-markdown";
 
 import type { FilterDropdownProps } from "antd/es/table/interface";
 import Highlighter from "react-highlight-words";
@@ -41,6 +42,7 @@ const ProcessoDetalhes: React.FC<ProcessoDetalhesProps> = ({
   processos,
   onVoltar,
 }) => {
+  console.log(processos);
   const exportToExcel = () => {
     const ws = XLSX.utils.json_to_sheet(processos);
     const wb = XLSX.utils.book_new();
@@ -59,7 +61,9 @@ const ProcessoDetalhes: React.FC<ProcessoDetalhesProps> = ({
   const justificativaAhFilters = useMemo(() => createFilters("justificativa_ah"), [processos]);
   const justificativaAaFilters = useMemo(() => createFilters("justificativa_aa"), [processos]);
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isSecondModalVisible, setIsSecondModalVisible] = useState(false);
   const [modalContent, setModalContent] = useState<any>(null);
+  const [secondModalContent, setSecondModalContent] = useState<string | null>(null);
   const searchInput = useRef<InputRef>(null);
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
@@ -69,9 +73,19 @@ const ProcessoDetalhes: React.FC<ProcessoDetalhesProps> = ({
     setIsModalVisible(true);
   };
 
+  const showMarkdownModal = (record: any) => {
+    setSecondModalContent(record.debug);
+    setIsSecondModalVisible(true);
+  };
+
   const handleModalClose = () => {
     setIsModalVisible(false);
   };
+
+  const handleSecondModalClose = () => {
+    setIsSecondModalVisible(false);
+  };
+
   const handleSearch = (
     selectedKeys: string[],
     confirm: FilterDropdownProps["confirm"],
@@ -183,6 +197,7 @@ const ProcessoDetalhes: React.FC<ProcessoDetalhesProps> = ({
       key: "id_pipefy",
       sorter: (a: DataType, b: DataType) => a.id_pipefy.localeCompare(b.id_pipefy),
       render: (text: string) => <Typography.Text>{text}</Typography.Text>,
+      ...getColumnSearchProps("id_pipefy"),
     },
     {
       title: "Tribunal",
@@ -196,6 +211,7 @@ const ProcessoDetalhes: React.FC<ProcessoDetalhesProps> = ({
       },
       filters: tribunalFilters,
       onFilter: (value, record) => record.tribunal === value,
+      ...getColumnSearchProps("tribunal"),
     },
     {
       title: "Análise humana",
@@ -203,6 +219,7 @@ const ProcessoDetalhes: React.FC<ProcessoDetalhesProps> = ({
       key: "analise_humana",
       filters: analiseHumanaFilters,
       onFilter: (value, record) => record.analise_humana === value,
+
       render: (text: string) =>
         text && text === "Sem análise" ? (
           <Tooltip title="Não contabilizado para a precisão de negativas!" color="#072854">
@@ -241,6 +258,7 @@ const ProcessoDetalhes: React.FC<ProcessoDetalhesProps> = ({
       filters: justificativaAhFilters,
       onFilter: (value, record) => record.justificativa_ah === value,
       render: (text: string) => <Typography.Text>{text}</Typography.Text>,
+      ...getColumnSearchProps("justificativa_ah"),
     },
     {
       title: "Justificativa automação",
@@ -250,6 +268,7 @@ const ProcessoDetalhes: React.FC<ProcessoDetalhesProps> = ({
       filters: justificativaAaFilters,
       onFilter: (value, record) => record.justificativa_aa === value,
       render: (text: string) => <Typography.Text>{text}</Typography.Text>,
+      ...getColumnSearchProps("justificativa_aa"),
     },
     {
       title: "Data AH",
@@ -264,7 +283,13 @@ const ProcessoDetalhes: React.FC<ProcessoDetalhesProps> = ({
       title: "Ação",
       dataIndex: "action",
       key: "action",
-      render: (_: any, record: any) => <a onClick={() => showDebugModal(record)}>Ver debug</a>,
+      render: (_: any, record: any) => (
+        <>
+          <a onClick={() => showDebugModal(record)}>Ver debug</a>
+          <br />
+          <a onClick={() => showMarkdownModal(record)}>Ver debugs md</a>
+        </>
+      ),
     },
   ];
 
@@ -318,12 +343,36 @@ const ProcessoDetalhes: React.FC<ProcessoDetalhesProps> = ({
       </Row>
       <Modal
         title="Debug Information"
-        visible={isModalVisible}
+        open={isModalVisible}
         onCancel={handleModalClose}
         footer={null}
         width={1000}
       >
         {renderDebugContent(modalContent)}
+      </Modal>
+      <Modal
+        title="Ver debugs md"
+        open={isSecondModalVisible}
+        onCancel={handleSecondModalClose}
+        footer={null}
+        width={1000}
+      >
+        {secondModalContent && (
+          <div
+            style={{
+              overflowY: "auto",
+              maxHeight: "calc(100vh - 200px)",
+              padding: "16px",
+              fontFamily: "sans-serif",
+              wordBreak: "break-word",
+            }}
+          >
+            <Typography.Paragraph style={{ whiteSpace: "pre-wrap" }}>
+              {" "}
+              <ReactMarkdown children={secondModalContent} />
+            </Typography.Paragraph>
+          </div>
+        )}
       </Modal>
     </>
   );
