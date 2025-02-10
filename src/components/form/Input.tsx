@@ -9,7 +9,7 @@ interface CustomInputProps extends InputProps {
   required?: boolean;
   classLabel?: string;
   disabled?: boolean;
-  value?: string;
+  value?: string | number;
 }
 
 const CustomInput: React.FC<CustomInputProps> = ({

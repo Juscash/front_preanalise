@@ -1,9 +1,13 @@
-import React, { useMemo, useState } from "react";
-import { Col, Row, Button, Typography, Tooltip, Modal } from "antd";
+import React, { useMemo, useState, useRef } from "react";
+import { Col, Row, Button, Typography, Tooltip, Modal, Input, Space } from "antd";
 import Table from "../table";
 import { GaugeChart } from "../graphics";
 import { ColumnsType } from "antd/es/table";
-import { WarningOutlined } from "@ant-design/icons";
+import { WarningOutlined, SearchOutlined } from "@ant-design/icons";
+import type { InputRef, TableColumnType } from "antd";
+
+import type { FilterDropdownProps } from "antd/es/table/interface";
+import Highlighter from "react-highlight-words";
 
 import * as XLSX from "xlsx";
 const { Text } = Typography;
@@ -19,6 +23,7 @@ interface DataType {
   justificativa_aa: string;
   data_ah: string;
 }
+type DataIndex = keyof DataType;
 
 interface ProcessoDetalhesProps {
   selectedTest: any;
@@ -55,6 +60,9 @@ const ProcessoDetalhes: React.FC<ProcessoDetalhesProps> = ({
   const justificativaAaFilters = useMemo(() => createFilters("justificativa_aa"), [processos]);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalContent, setModalContent] = useState<any>(null);
+  const searchInput = useRef<InputRef>(null);
+  const [searchText, setSearchText] = useState("");
+  const [searchedColumn, setSearchedColumn] = useState("");
 
   const showDebugModal = (record: any) => {
     setModalContent(record.debugs);
@@ -64,18 +72,110 @@ const ProcessoDetalhes: React.FC<ProcessoDetalhesProps> = ({
   const handleModalClose = () => {
     setIsModalVisible(false);
   };
-
+  const handleSearch = (
+    selectedKeys: string[],
+    confirm: FilterDropdownProps["confirm"],
+    dataIndex: DataIndex
+  ) => {
+    confirm();
+    setSearchText(selectedKeys[0]);
+    setSearchedColumn(dataIndex);
+  };
+  const handleReset = (clearFilters: () => void) => {
+    clearFilters();
+    setSearchText("");
+  };
+  const getColumnSearchProps = (dataIndex: DataIndex): TableColumnType<DataType> => ({
+    filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters, close }) => (
+      <div style={{ padding: 8 }} onKeyDown={(e) => e.stopPropagation()}>
+        <Input
+          ref={searchInput}
+          placeholder={`Procurar ${dataIndex}`}
+          value={selectedKeys[0]}
+          onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+          onPressEnter={() => handleSearch(selectedKeys as string[], confirm, dataIndex)}
+          style={{ marginBottom: 8, display: "block" }}
+        />
+        <Space>
+          <Button
+            type="primary"
+            onClick={() => handleSearch(selectedKeys as string[], confirm, dataIndex)}
+            icon={<SearchOutlined />}
+            size="small"
+            style={{ width: 90 }}
+          >
+            Procurar
+          </Button>
+          <Button
+            onClick={() => clearFilters && handleReset(clearFilters)}
+            size="small"
+            style={{ width: 90 }}
+          >
+            Reset
+          </Button>
+          <Button
+            type="link"
+            size="small"
+            onClick={() => {
+              confirm({ closeDropdown: false });
+              setSearchText((selectedKeys as string[])[0]);
+              setSearchedColumn(dataIndex);
+            }}
+          >
+            Filtro
+          </Button>
+          <Button
+            type="link"
+            size="small"
+            onClick={() => {
+              close();
+            }}
+          >
+            Fechar
+          </Button>
+        </Space>
+      </div>
+    ),
+    filterIcon: (filtered: boolean) => (
+      <SearchOutlined style={{ color: filtered ? "#1677ff" : undefined }} />
+    ),
+    onFilter: (value, record) =>
+      record[dataIndex]
+        .toString()
+        .toLowerCase()
+        .includes((value as string).toLowerCase()),
+    filterDropdownProps: {
+      onOpenChange(open) {
+        if (open) {
+          setTimeout(() => searchInput.current?.select(), 100);
+        }
+      },
+    },
+    render: (text) =>
+      searchedColumn === dataIndex ? (
+        <Highlighter
+          highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
+          searchWords={[searchText]}
+          autoEscape
+          textToHighlight={text ? text.toString() : ""}
+        />
+      ) : (
+        text
+      ),
+  });
   const columns: ColumnsType<DataType> = [
     {
       title: "Processo",
       dataIndex: "numero_processo",
       key: "numero_processo",
+
       sorter: (a: DataType, b: DataType) => {
         const processoA = a?.numero_processo || "";
         const processoB = b?.numero_processo || "";
         return processoA.localeCompare(processoB);
       },
       render: (text: string) => <Typography.Text>{text}</Typography.Text>,
+      ...getColumnSearchProps("numero_processo"),
     },
     {
       title: "Pipefy",
