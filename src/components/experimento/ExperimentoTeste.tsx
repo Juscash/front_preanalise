@@ -7,6 +7,7 @@ import { GaugeChart } from "../graphics";
 import { ColumnsType } from "antd/es/table";
 import { WarningOutlined } from "@ant-design/icons";
 import { ExperimentoData, processosAnalisados } from "../../services/api";
+import ReactMarkdown from "react-markdown";
 
 const colors = {
   Aprovado: "success",
@@ -25,6 +26,16 @@ const ExperimentoTeste: React.FC<ExperimentoData> = (data) => {
   const analiseAutomacaoFilters = useMemo(() => createFilters("analise_automatica"), [data]);
   const justificativaAhFilters = useMemo(() => createFilters("justificativa_ah"), [data]);
   const justificativaAaFilters = useMemo(() => createFilters("justificativa_aa"), [data]);
+  const [secondModalContent, setSecondModalContent] = useState<string | null>(null);
+  const [isSecondModalVisible, setIsSecondModalVisible] = useState(false);
+
+  const showMarkdownModal = (record: any) => {
+    setSecondModalContent(record.debug);
+    setIsSecondModalVisible(true);
+  };
+  const handleSecondModalClose = () => {
+    setIsSecondModalVisible(false);
+  };
 
   const columns: ColumnsType<processosAnalisados> = [
     {
@@ -119,7 +130,13 @@ const ExperimentoTeste: React.FC<ExperimentoData> = (data) => {
       title: "Ação",
       dataIndex: "action",
       key: "action",
-      render: (_: any, record: any) => <a onClick={() => showDebugModal(record)}>Ver debug</a>,
+      render: (_: any, record: any) => (
+        <>
+          <a onClick={() => showDebugModal(record)}>Ver debug</a>
+          <br />
+          <a onClick={() => showMarkdownModal(record)}>Ver debugs md</a>
+        </>
+      ),
     },
   ];
   const exportToExcel = () => {
@@ -192,6 +209,30 @@ const ExperimentoTeste: React.FC<ExperimentoData> = (data) => {
         width={1000}
       >
         {renderDebugContent(modalContent)}
+      </Modal>
+      <Modal
+        title="Ver debugs md"
+        open={isSecondModalVisible}
+        onCancel={handleSecondModalClose}
+        footer={null}
+        width={1000}
+      >
+        {secondModalContent && (
+          <div
+            style={{
+              overflowY: "auto",
+              maxHeight: "calc(100vh - 200px)",
+              padding: "16px",
+              fontFamily: "sans-serif",
+              wordBreak: "break-word",
+            }}
+          >
+            <Typography.Paragraph style={{ whiteSpace: "pre-wrap" }}>
+              {" "}
+              <ReactMarkdown children={secondModalContent} />
+            </Typography.Paragraph>
+          </div>
+        )}
       </Modal>
     </div>
   );
