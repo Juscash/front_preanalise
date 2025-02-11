@@ -42,7 +42,6 @@ const ProcessoDetalhes: React.FC<ProcessoDetalhesProps> = ({
   processos,
   onVoltar,
 }) => {
-  console.log(processos);
   const exportToExcel = () => {
     const ws = XLSX.utils.json_to_sheet(processos);
     const wb = XLSX.utils.book_new();
@@ -241,6 +240,7 @@ const ProcessoDetalhes: React.FC<ProcessoDetalhesProps> = ({
       dataIndex: "analise_automatica",
       key: "analise_automatica",
       filters: analiseAutomacaoFilters,
+
       onFilter: (value, record) => record.analise_automatica === value,
       render: (text: string) => (
         <Typography.Text
@@ -258,7 +258,6 @@ const ProcessoDetalhes: React.FC<ProcessoDetalhesProps> = ({
       filters: justificativaAhFilters,
       onFilter: (value, record) => record.justificativa_ah === value,
       render: (text: string) => <Typography.Text>{text}</Typography.Text>,
-      ...getColumnSearchProps("justificativa_ah"),
     },
     {
       title: "Justificativa automação",
@@ -268,7 +267,6 @@ const ProcessoDetalhes: React.FC<ProcessoDetalhesProps> = ({
       filters: justificativaAaFilters,
       onFilter: (value, record) => record.justificativa_aa === value,
       render: (text: string) => <Typography.Text>{text}</Typography.Text>,
-      ...getColumnSearchProps("justificativa_aa"),
     },
     {
       title: "Data AH",
