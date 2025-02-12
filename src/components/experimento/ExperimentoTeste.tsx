@@ -13,7 +13,6 @@ const colors = {
   Aprovado: "success",
   Negado: "danger",
 };
-const { Text } = Typography;
 const ExperimentoTeste: React.FC<ExperimentoData> = (data) => {
   const createFilters = (key: keyof processosAnalisados) => {
     const uniqueValues = Array.from(new Set(data.outputs.map((item) => item[key])));
