@@ -81,6 +81,12 @@ export interface TestesData {
   cobertura: number;
 }
 
+export interface ProcessosFiltroReanalise {
+  porcentagem?: number;
+  data_inicio: string;
+  data_fim: string;
+}
+
 const handleApiError = (error: any): never => {
   console.error("API Errorr:", error);
   throw error;
@@ -181,4 +187,24 @@ export const getExperimentosMotor = async (motor_id: number): Promise<Experiment
   }
 };
 
+export const processosReanalise = async (data: ProcessosFiltroReanalise): Promise<Processo[]> => {
+  try {
+    const response: AxiosResponse = await api.post("reanalise/listar_processos", data);
+    return response.data;
+  } catch (error) {
+    return handleApiError(error);
+  }
+};
+
+export const reanalise = async (
+  data: Omit<TestExperimentoData, "descricao">
+): Promise<ExperimentoData> => {
+  try {
+    console.log(data);
+    const response: AxiosResponse = await api.post("reanalise/executar", data);
+    return response.data;
+  } catch (error) {
+    return handleApiError(error);
+  }
+};
 export default api;
