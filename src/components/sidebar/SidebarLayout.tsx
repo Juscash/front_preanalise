@@ -9,6 +9,7 @@ import {
   LogoutOutlined,
   ExperimentOutlined,
   UserOutlined,
+  SyncOutlined,
 } from "@ant-design/icons";
 import { useAuth } from "../../contexts/AuthContext";
 import Logo from "../../assets/img/logo.svg";
@@ -38,7 +39,7 @@ const menuItems = [
     icon: <HistoryOutlined />,
     label: "Histórico de Experimentos",
   },
-  // { key: "/nova-reanalise", icon: <SyncOutlined />, label: "Nova reanalise" },
+  { key: "/reanalise", icon: <SyncOutlined />, label: "Reanalise" },
 ];
 
 const SidebarLayout: React.FC<SidebarLayoutProps> = ({ children }) => {

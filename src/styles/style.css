@@ -132,6 +132,8 @@ textarea::placeholder {
     background-color: var(--background-color);
     display: flex;
     flex-wrap: wrap;
+    max-height: 300px;
+    overflow-y: auto;
 }
 
 .tag-input-tag {
