@@ -20,21 +20,16 @@ const ExperimentoTeste: React.FC<ExperimentoData> = (data) => {
     return uniqueValues.map((value) => ({ text: value as React.ReactNode, value: value ?? "" }));
   };
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [modalContent, setModalContent] = useState<any>(null);
   const tribunalFilters = useMemo(() => createFilters("tribunal"), [data]);
   const analiseHumanaFilters = useMemo(() => createFilters("analise_humana"), [data]);
   const analiseAutomacaoFilters = useMemo(() => createFilters("analise_automatica"), [data]);
   const justificativaAhFilters = useMemo(() => createFilters("justificativa_ah"), [data]);
   const justificativaAaFilters = useMemo(() => createFilters("justificativa_aa"), [data]);
-  const [secondModalContent, setSecondModalContent] = useState<string | null>(null);
-  const [isSecondModalVisible, setIsSecondModalVisible] = useState(false);
+  const [modalContent, setModalContent] = useState<string | null>(null);
 
   const showMarkdownModal = (record: any) => {
-    setSecondModalContent(record.debug);
-    setIsSecondModalVisible(true);
-  };
-  const handleSecondModalClose = () => {
-    setIsSecondModalVisible(false);
+    setModalContent(record.debug);
+    setIsModalVisible(true);
   };
 
   const columns: ColumnsType<processosAnalisados> = [
@@ -132,9 +127,7 @@ const ExperimentoTeste: React.FC<ExperimentoData> = (data) => {
       key: "action",
       render: (_: any, record: any) => (
         <>
-          <a onClick={() => showDebugModal(record)}>Ver debug</a>
-          <br />
-          <a onClick={() => showMarkdownModal(record)}>Ver debugs md</a>
+          <a onClick={() => showMarkdownModal(record)}>Ver logs</a>
         </>
       ),
     },
@@ -152,30 +145,27 @@ const ExperimentoTeste: React.FC<ExperimentoData> = (data) => {
     { label: "NBE", value: data.metricas.nbe },
     { label: "Cobertura", value: data.metricas.cobertura },
   ];
-  const showDebugModal = (record: any) => {
-    setModalContent(record.debugs);
-    setIsModalVisible(true);
-  };
 
   const handleModalClose = () => {
     setIsModalVisible(false);
   };
 
-  const renderDebugContent = (content: string) => {
-    if (Array.isArray(content)) {
-      return content.map((item, index) => (
-        <div key={index} style={{ marginBottom: "20px" }}>
-          <Text strong>{`Iteração ${index}:`}</Text>
-          <pre style={{ whiteSpace: "pre-wrap", wordWrap: "break-word" }}>
-            {JSON.stringify(item, null, 2)}
-          </pre>
-        </div>
-      ));
-    }
+  const renderDebugContent = () => {
     return (
-      <pre style={{ whiteSpace: "pre-wrap", wordWrap: "break-word" }}>
-        {JSON.stringify(content, null, 2)}
-      </pre>
+      <div
+        style={{
+          overflowY: "auto",
+          maxHeight: "calc(100vh - 200px)",
+          padding: "16px",
+          fontFamily: "sans-serif",
+          wordBreak: "break-word",
+        }}
+      >
+        <Typography.Paragraph style={{ whiteSpace: "pre-wrap" }}>
+          {" "}
+          <ReactMarkdown children={modalContent} />
+        </Typography.Paragraph>
+      </div>
     );
   };
 
@@ -202,37 +192,13 @@ const ExperimentoTeste: React.FC<ExperimentoData> = (data) => {
         </Col>
       </Row>
       <Modal
-        title="Debug Information"
-        visible={isModalVisible}
+        title="Logs de debug"
+        open={isModalVisible}
         onCancel={handleModalClose}
         footer={null}
         width={1000}
       >
-        {renderDebugContent(modalContent)}
-      </Modal>
-      <Modal
-        title="Ver debugs md"
-        open={isSecondModalVisible}
-        onCancel={handleSecondModalClose}
-        footer={null}
-        width={1000}
-      >
-        {secondModalContent && (
-          <div
-            style={{
-              overflowY: "auto",
-              maxHeight: "calc(100vh - 200px)",
-              padding: "16px",
-              fontFamily: "sans-serif",
-              wordBreak: "break-word",
-            }}
-          >
-            <Typography.Paragraph style={{ whiteSpace: "pre-wrap" }}>
-              {" "}
-              <ReactMarkdown children={secondModalContent} />
-            </Typography.Paragraph>
-          </div>
-        )}
+        {renderDebugContent()}
       </Modal>
     </div>
   );

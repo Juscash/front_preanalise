@@ -283,9 +283,11 @@ const ProcessoDetalhes: React.FC<ProcessoDetalhesProps> = ({
       key: "action",
       render: (_: any, record: any) => (
         <>
-          <a onClick={() => showDebugModal(record)}>Ver debug</a>
-          <br />
-          <a onClick={() => showMarkdownModal(record)}>Ver debugs md</a>
+          {record.debug ? (
+            <a onClick={() => showMarkdownModal(record)}>Ver Logs </a>
+          ) : (
+            <a onClick={() => showDebugModal(record)}>Ver Logs</a>
+          )}
         </>
       ),
     },
