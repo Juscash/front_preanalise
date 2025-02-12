@@ -10,9 +10,8 @@ import { Motores } from "../../models";
 import { useExperimentos } from "../../hooks/useExperimentos";
 import { CustomDateRange, Number, TagInput } from "../../components/form";
 import dayjs from "dayjs";
-import customParseFormat from "dayjs/plugin/customParseFormat";
 import { SearchOutlined } from "@ant-design/icons";
-import { processosReanalise, reanalise, ExperimentoData } from "../../services/api";
+import { processosReanalise, reanalise } from "../../services/api";
 
 const DEFAULT_START_DATE = "2024-09-01";
 const DEFAULT_END_DATE = "2024-09-30";
@@ -26,7 +25,6 @@ const NovaReanalise: React.FC = () => {
   const { motores, fetchMotores, loading: motorLoading } = useMotores();
   const [descricao, setDescricao] = useState<string>("");
   const [processos, setProcessos] = useState<ProcessoID[]>([]);
-  const [resultData, setResultData] = useState<ExperimentoData>();
 
   const [filterProcess, setFilterProcess] = useState<{
     data_inicio: string;
@@ -79,10 +77,7 @@ const NovaReanalise: React.FC = () => {
     },
     [experimentosMotor, experimentos.versao, setExperimentos]
   );
-  const handleDateChange = (
-    dates: [dayjs.Dayjs | null, dayjs.Dayjs | null],
-    isModal: boolean = false
-  ) => {
+  const handleDateChange = (dates: [dayjs.Dayjs | null, dayjs.Dayjs | null]) => {
     if (dates[0] && dates[1]) {
       const newDates = {
         data_inicio: dates[0].format("YYYY-MM-DD"),
@@ -153,7 +148,6 @@ const NovaReanalise: React.FC = () => {
         id_experimento: experimentos.id,
       });
 
-      setResultData(data);
       console.log(data, "res");
     } catch (error) {
       console.error("Erro ao buscar processos por motivo:", error);
