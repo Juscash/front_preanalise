@@ -35,7 +35,7 @@ export const ExperimentoSelector: React.FC<ExperimentoSelectorProps> = ({
     {!gravar && (
       <Col span={7}>
         <Input
-          label="Descrição do teste"
+          label="Titulo do teste"
           name="descricao"
           value={descricao}
           onChange={(e) => onDescricaoChange && onDescricaoChange(e.target.value)}
