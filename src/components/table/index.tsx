@@ -58,7 +58,7 @@ const TableDefault = ({
     scroll.y = 240;
   }
   if (xScroll) {
-    scroll.x = "100vw";
+    scroll.x = "max-content";
   }
   const defaultFooter = () => footerText;
   const defaultTitle = () => titleText;

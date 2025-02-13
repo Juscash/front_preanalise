@@ -63,6 +63,14 @@ export interface ExperimentoData {
   outputs: processosAnalisados[];
   metricas: metricas;
 }
+
+export interface MessagesChat {
+  id: number;
+  id_teste: number;
+  comentario: string;
+  usuario: string;
+  dataHora: string;
+}
 export interface TestesData {
   id_experimento: number;
   id_teste: number;
@@ -79,6 +87,7 @@ export interface TestesData {
   versao: string;
   descricao_teste: string;
   cobertura: number;
+  historico_observacoes: MessagesChat[];
 }
 
 export interface ProcessosFiltroReanalise {
@@ -207,4 +216,24 @@ export const reanalise = async (
     return handleApiError(error);
   }
 };
+
+export const enviarMensagemChat = async (
+  message: Pick<MessagesChat, "comentario" | "id_teste">
+): Promise<any> => {
+  const send = {
+    id_teste: message.id_teste,
+    comentario: message.comentario,
+  };
+
+  try {
+    const response: AxiosResponse = await api.post("experimentos/mensagem", send);
+    if (response.status !== 201) {
+      throw new Error("Falha ao enviar mensagem");
+    }
+    return response.data;
+  } catch (error) {
+    return handleApiError(error);
+  }
+};
+
 export default api;

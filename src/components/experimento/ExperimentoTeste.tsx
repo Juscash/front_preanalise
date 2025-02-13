@@ -132,7 +132,29 @@ const ExperimentoTeste: React.FC<ExperimentoData> = (data) => {
     },
   ];
   const exportToExcel = () => {
-    const ws = XLSX.utils.json_to_sheet(data.outputs);
+    const filteredProcessos = data.outputs.map((processo) => {
+      const {
+        id_pipefy,
+        numero_processo,
+        tribunal,
+        analise_humana,
+        analise_automatica,
+        justificativa_ah,
+        justificativa_aa,
+        data_ah,
+      } = processo;
+      return {
+        id_pipefy,
+        numero_processo,
+        tribunal,
+        analise_humana,
+        analise_automatica,
+        justificativa_ah,
+        justificativa_aa,
+        data_ah,
+      };
+    });
+    const ws = XLSX.utils.json_to_sheet(filteredProcessos);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Resultados");
     XLSX.writeFile(wb, "resultados_teste_prompt.xlsx");
