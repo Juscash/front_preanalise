@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { List, Avatar, message, Input, Space, Drawer, Layout } from "antd";
 import dayjs from "dayjs";
 import { enviarMensagemChat, MessagesChat } from "../../services/api";
+import { useAuth } from "../../contexts/AuthContext";
 
 interface ChatProps {
   visible: boolean;
@@ -22,6 +23,7 @@ const ChatComponent: React.FC<ChatProps> = ({
   const [messageHistory, setMessageHistory] = useState<MessagesChat[]>(initialMessages);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const [loading, setLoading] = useState(false);
+  const { user } = useAuth();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setMessageInput(e.target.value);
@@ -33,7 +35,7 @@ const ChatComponent: React.FC<ChatProps> = ({
     const newMessage: MessagesChat = {
       id: 0,
       comentario: messageInput,
-      usuario: "User",
+      usuario: user?.name || "Usuário",
       dataHora: new Date().toISOString(),
       id_teste: id_teste,
     };
@@ -105,6 +107,7 @@ const ChatComponent: React.FC<ChatProps> = ({
               onSearch={handleSendMessage}
               style={{ minWidth: "150%" }}
               loading={loading}
+              inputMode="text"
             />
           </Space>
         </Layout.Footer>

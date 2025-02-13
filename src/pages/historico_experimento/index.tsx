@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { Row, Col, Typography, Spin, message, Badge } from "antd";
+import { Row, Col, Typography, Spin, message, Badge, Tooltip } from "antd";
 import dayjs from "dayjs";
 import Table from "../../components/table";
 import { Title } from "../../components/typograph";
@@ -7,6 +7,7 @@ import { getListarTestes, getProcessosTeste, TestesData } from "../../services/a
 import { ColumnsType } from "antd/es/table";
 import ProcessoDetalhes from "../../components/results/ProcessoDetalhes";
 import Chat from "../../components/chat";
+import { LineChartOutlined, EditOutlined } from "@ant-design/icons";
 
 interface Message {
   id: number;
@@ -204,11 +205,20 @@ const HistoricoExperimento: React.FC = () => {
         fixed: "right",
         render: (_: any, record: TestesData) => (
           <>
-            <a onClick={() => handleRowClick(record)}>Processos</a>
-            <br />
-            <Badge count={record.historico_observacoes.length}>
-              <a onClick={() => selectedChat(record)}>Observações</a>
-            </Badge>
+            <Tooltip title="Ver processos" color={"blue"}>
+              <LineChartOutlined
+                style={{ fontSize: "20px", color: "#1890ff", marginRight: 10 }}
+                onClick={() => handleRowClick(record)}
+              />
+            </Tooltip>
+            <Tooltip title="Ver observações" color={"blue"}>
+              <Badge count={record.historico_observacoes.length} offset={[7, -2]} size="small">
+                <EditOutlined
+                  style={{ fontSize: "20px", color: "#1890ff" }}
+                  onClick={() => selectedChat(record)}
+                />
+              </Badge>
+            </Tooltip>
           </>
         ),
       },
