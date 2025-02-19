@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Row, Col, Button, message, Form, Spin } from "antd";
+import { Row, Col, Button, message, Form, Spin, notification, Typography, Space } from "antd";
 import { Title } from "../../components/typograph";
 
 import { useMotores } from "../../hooks/useMotores";
@@ -37,6 +37,8 @@ const DEFAULT_START_DATE = "2024-09-01";
 const DEFAULT_END_DATE = "2024-09-30";
 
 const testarExperimentos: React.FC = () => {
+  const [api, contextHolder] = notification.useNotification();
+
   const [form] = Form.useForm();
   const [listProcessos, setListProcessos] = useState<string>("");
   const [descricao, setDescricao] = useState<string>("");
@@ -175,13 +177,14 @@ const testarExperimentos: React.FC = () => {
       ? listProcessos
           .replace(/\s+/g, "")
           .split(",")
-          .map((p) => p.trim())
+          .map((p) => p.trim().replace(/[-.]/g, ""))
           .filter((p) => p !== "")
       : listProcessos
           .split("\n")
-          .map((p) => p.trim())
+          .map((p) => p.trim().replace(/[-.]/g, ""))
           .filter((p) => p !== "");
 
+    console.log(arrayProcess);
     const requestData = {
       lista_processos: arrayProcess,
       data_inicio: filterProcessModal.data_inicio,
@@ -199,6 +202,13 @@ const testarExperimentos: React.FC = () => {
         return accumulator;
       }, []);
 
+      const processosNaoRetornados = arrayProcess.filter(
+        (processo) => !uniqueData.some((unique) => unique.numero_processo === processo)
+      );
+
+      if (processosNaoRetornados.length > 0) {
+        openNotification(processosNaoRetornados);
+      }
       setProcessos(uniqueData);
       setListProcessos("");
       setIsModalVisible(false);
@@ -244,8 +254,62 @@ const testarExperimentos: React.FC = () => {
       setLoading(false);
     }
   };
+  interface ProcessListWithCopyProps {
+    processos: string[];
+  }
+  const ProcessListWithCopy: React.FC<ProcessListWithCopyProps> = ({ processos }) => {
+    const handleCopy = () => {
+      navigator.clipboard
+        .writeText(processos.join(", "))
+        .then(() => alert("Processos copiados!"))
+        .catch(() => alert("Erro ao copiar."));
+    };
+
+    return (
+      <div
+        style={{
+          maxHeight: "600px",
+          display: "flex",
+          flexDirection: "column",
+          maxWidth: "500px",
+        }}
+      >
+        <div
+          style={{
+            overflowY: "auto",
+            flex: 1,
+            padding: "10px",
+          }}
+        >
+          {processos.map((processo, index) => (
+            <div key={index} style={{ marginBottom: "8px" }}>
+              <Typography.Text>{processo}</Typography.Text>
+            </div>
+          ))}
+        </div>
+        <div style={{ padding: "10px" }}>
+          <Space>
+            <Button type="primary" onClick={handleCopy}>
+              Copiar Processos
+            </Button>
+          </Space>
+        </div>
+      </div>
+    );
+  };
+
+  const openNotification = (processos: string[]) => {
+    notification.open({
+      message: `Processos não encontrados - ${processos.length}`,
+      description: <ProcessListWithCopy processos={processos} />,
+      duration: 15,
+      type: "error",
+    });
+  };
+
   return (
     <>
+      {contextHolder}
       <Title level={1}>Teste de experimento</Title>
       <Spin spinning={motorLoading || experimentoLoading}>
         <Form form={form} layout="vertical" onFinish={startTeste}>
