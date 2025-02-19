@@ -37,7 +37,7 @@ const DEFAULT_START_DATE = "2024-09-01";
 const DEFAULT_END_DATE = "2024-09-30";
 
 const testarExperimentos: React.FC = () => {
-  const [api, contextHolder] = notification.useNotification();
+  const [, contextHolder] = notification.useNotification();
 
   const [form] = Form.useForm();
   const [listProcessos, setListProcessos] = useState<string>("");
