@@ -131,7 +131,7 @@ const HistoricoExperimento: React.FC = () => {
         filters: createFilters(data, "data_aa"),
         onFilter: (value, record) => record.data_aa === value,
         render: (data: string) => (
-          <div className="text-center">{dayjs(data).format("DD/MM/YYYY")}</div>
+          <div className="text-center">{dayjs(data).format("DD/MM/YY - hh:mm")}</div>
         ),
       },
       {
