@@ -104,7 +104,7 @@ const handleApiError = (error: any): never => {
 export const getIdprocess = async (data: ProcessoFiltro): Promise<Processo[]> => {
   try {
     const response: AxiosResponse<Processo[]> = await api.post(
-      "/prompt_tester/buscar_id_processos",
+      "/processos/buscar_id_processos",
       data
     );
     return response.data;
@@ -115,9 +115,7 @@ export const getIdprocess = async (data: ProcessoFiltro): Promise<Processo[]> =>
 
 export const getSaidasProcessos = async (): Promise<MotivosProcesso[]> => {
   try {
-    const response: AxiosResponse<MotivosProcesso[]> = await api.get(
-      "prompt_tester/saidas_processos"
-    );
+    const response: AxiosResponse<MotivosProcesso[]> = await api.get("processos/saidas_processos");
     return response.data;
   } catch (error) {
     return handleApiError(error);
@@ -129,7 +127,7 @@ export const getProcessosMotivo = async (
 ): Promise<Processo[]> => {
   try {
     const response: AxiosResponse<Processo[]> = await api.post(
-      "prompt_tester/processos_por_motivo",
+      "processos/processos_por_motivo",
       filtro
     );
     return response.data;
@@ -140,7 +138,7 @@ export const getProcessosMotivo = async (
 
 export const getListarTestes = async (): Promise<TestesData[]> => {
   try {
-    const response: AxiosResponse = await api.get("prompt_tester/listar_testes");
+    const response: AxiosResponse = await api.get("processos/listar_testes");
     return response.data;
   } catch (error) {
     return handleApiError(error);
@@ -149,7 +147,7 @@ export const getListarTestes = async (): Promise<TestesData[]> => {
 
 export const getProcessosTeste = async (id: string | number): Promise<any> => {
   try {
-    const response: AxiosResponse = await api.get(`prompt_tester/listar_resultados_teste/${id}`);
+    const response: AxiosResponse = await api.get(`processos/listar_resultados_teste/${id}`);
     return response.data;
   } catch (error) {
     return handleApiError(error);
